@@ -1,13 +1,9 @@
 import DemoPage from '../pages/DemoPage';
+const demoPage = new DemoPage();
 
 describe('Demo Test', () => {
   it('should log in successfully', () => {
-    
-    cy.visit('https://www.groupseres.com/');
-    cy.wait(5000);
-
-    const demoPage = new DemoPage();
-
+    demoPage.navigate('https://www.groupseres.com/');
     demoPage.clickDoc();
     cy.url().should('eq', 'https://www.groupseres.com/casos-de-exito');
   });

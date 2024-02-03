@@ -1,9 +1,0 @@
-{
-    "baseUrl": "http://localhost:3000",
-    "viewportWidth": 1366,
-    "viewportHeight": 768,
-    "pageLoadTimeout": 10000,
-    "defaultCommandTimeout": 4000,
-    "requestTimeout": 5000,
-    "responseTimeout": 30000
-  }
