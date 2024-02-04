@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  e2e-tests:
+    build: .
+    container_name: cypress_e2e_tests
+    command: xvfb-run npx cypress run --headless --browser electron
+    volumes:
+      - ./:/app
+      - ./cypress/screenshots:/app/cypress/screenshots
+      - ./cypress/videos:/app/cypress/videos
+    environment:
+      - DISPLAY=99
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m" # Set the maximum log file size
+        max-file: "3"    # Set the maximum number of log files
+
