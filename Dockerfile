@@ -31,31 +31,24 @@ COPY package*.json ./
 # Install project dependencies, including Cypress
 RUN npm ci
 
-# Set up the Xvfb display
-ENV DISPLAY=:99
-
-# Add environment variable for D-Bus
+# Set up the Xvfb display and add environment variable for D-Bus
+ENV DISPLAY=:
 ENV DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
 
-# Create a custom entrypoint script to start necessary services
-RUN echo $'#!/bin/bash\n\
-# Start D-Bus\n\
-dbus-daemon --session --fork\n\
-# Start Xvfb\n\
-Xvfb :99 -screen 0 1280x720x24 > /dev/null 2>&1 &\n\
-# Wait a bit for Xvfb to start\n\
-sleep 3\n\
-exec "$@"' > /usr/local/bin/docker-entrypoint.sh && \
-    chmod +x /usr/local/bin/docker-entrypoint.sh
+# Set TERM environment variable to avoid terminal-related warnings
+ENV TERM xterm
+
+# Copy custom scripts into the Docker image and make them executable
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY verify-cypress.sh /usr/local/bin/verify-cypress.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh /usr/local/bin/verify-cypress.sh
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
 # Copy the rest of your project files into the Docker image
 COPY . .
 
-# However, if you prefer to keep it here for build-time verification, it's included:
-RUN npx cypress verify
-
 # The CMD instruction should be used to run Cypress
 # This is the default command that runs when the container starts
 CMD ["npx", "cypress", "run", "--headless", "--browser", "electron"]
+

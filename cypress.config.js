@@ -8,7 +8,6 @@ module.exports = defineConfig({
     video: true,
     videosFolder: 'cypress/videos',
     videoCompression: 32,
-    videoUploadOnPasses: false,
     screenshotsFolder: 'cypress/screenshots',
     screenshotOnRunFailure: true,
     browser: 'electron',
