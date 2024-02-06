@@ -1,10 +1,16 @@
 import DemoPage from '../pages/DemoPage';
-const demoPage = new DemoPage();
 
 describe('Demo Test', () => {
   it('should log in successfully', () => {
-    demoPage.navigate('https://www.groupseres.com/');
+    const demoPage = new DemoPage();
+    const baseUrl = Cypress.env('baseUrl');
+    const assertUrl = Cypress.env('assertUrl');
+
+    cy.log(`Base URL: ${baseUrl}`);
+    cy.log(`Assert URL: ${assertUrl}`);
+    
+    demoPage.navigate(baseUrl);
     demoPage.clickDoc();
-    cy.url().should('eq', 'https://www.groupseres.com/casos-de-exito');
+    cy.url().should('eq', assertUrl);
   });
 });
