@@ -18,12 +18,36 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libasound2 \
     libxtst6 \
     xauth \
-    xvfb && \
+    xvfb \
+    # Install wget and fonts to support headless browser testing
+    wget \
+    fonts-liberation \
+    libappindicator3-1 \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatspi2.0-0 \
+    libcups2 \
+    libdbus-1-3 \
+    libnspr4 \
+    libnss3 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    xdg-utils && \
     dbus-uuidgen > /var/lib/dbus/machine-id && \
     rm -rf /var/lib/apt/lists/* && \
     npm install -g npm@latest && \
     # Verify that npm and node are correctly installed
     node --version && npm --version
+
+# Install Google Chrome
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list \
+    && apt-get update && apt-get install -y google-chrome-stable && rm -rf /var/lib/apt/lists/*
+
+# Install Firefox
+RUN apt-get update && apt-get install -y firefox-esr && rm -rf /var/lib/apt/lists/*
 
 # Copy package.json and package-lock.json into the Docker image
 COPY package*.json ./
@@ -53,5 +77,4 @@ COPY . .
 
 # The CMD instruction should be used to run Cypress
 # This is the default command that runs when the container starts
-CMD ["npx", "cypress", "run", "--headless", "--browser", "electron"]
-
+CMD ["npx", "cypress", "run", "--headless"]
