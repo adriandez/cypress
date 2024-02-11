@@ -7,11 +7,15 @@ module.exports = defineConfig({
     setupNodeEvents(on, config) {
       on('file:preprocessor', cucumber());
       const environment = process.env.TEST_ENV || 'preproduction';
-      const browser = process.env.TEST_BROWSER || 'electron'; // Default to 'electron' if not specified
+      const browser = process.env.TEST_BROWSER || 'electron';
+      const viewportWidth = parseInt(process.env.VIEWPORT_WIDTH) || 1280;
+      const viewportHeight = parseInt(process.env.VIEWPORT_HEIGHT) || 720;
       const environmentConfig = getConfig(environment);
       console.log(`-------> Running tests in the '${environment}'`);
       config.baseUrl = environmentConfig.baseUrl;
-      config.browser = browser; // Dynamically set the browser
+      config.browser = browser; 
+      config.viewportWidth = viewportWidth;
+      config.viewportHeight = viewportHeight; 
       return config;
     },
     specPattern: 'cypress/e2e/cucumber/feature/*.feature',
@@ -21,6 +25,6 @@ module.exports = defineConfig({
     videoCompression: 32,
     screenshotsFolder: 'cypress/screenshots',
     screenshotOnRunFailure: true,
-    headless: true, // Keep headless mode enabled by default
+    headless: true,
   },
 });

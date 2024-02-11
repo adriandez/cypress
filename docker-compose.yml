@@ -11,6 +11,8 @@ services:
     environment:
       - DISPLAY=
       - TEST_ENV=${TEST_ENV}
+      - VIEWPORT_WIDTH=${VIEWPORT_WIDTH}
+      - VIEWPORT_HEIGHT=${VIEWPORT_HEIGHT}
       - TEST_BROWSER=chrome
     logging:
       driver: "json-file"
@@ -29,6 +31,8 @@ services:
     environment:
       - DISPLAY=
       - TEST_ENV=${TEST_ENV}
+      - VIEWPORT_WIDTH=${VIEWPORT_WIDTH}
+      - VIEWPORT_HEIGHT=${VIEWPORT_HEIGHT}
       - TEST_BROWSER=firefox
     logging:
       driver: "json-file"

@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "cypress run --headless",
-    "test:local": "cross-env TEST_ENV=local cypress run --headless",
-    "test:develop": "cross-env TEST_ENV=develop cypress run --headless",
-    "test:testing": "cross-env TEST_ENV=testing cypress run --headless",
-    "test:preproduction": "cross-env TEST_ENV=preproduction cypress run --headless"
+    "test:local": "cross-env TEST_ENV=local VIEWPORT_WIDTH=1920 VIEWPORT_HEIGHT=1080 cypress run --headless",
+    "test:develop": "cross-env TEST_ENV=develop VIEWPORT_WIDTH=1920 VIEWPORT_HEIGHT=1080 cypress run --headless",
+    "test:testing": "cross-env TEST_ENV=testing VIEWPORT_WIDTH=1920 VIEWPORT_HEIGHT=1080 cypress run --headless",
+    "test:preproduction": "cross-env TEST_ENV=preproduction VIEWPORT_WIDTH=1920 VIEWPORT_HEIGHT=1080 cypress run --headless"
   },
   "author": "",
   "license": "ISC",
