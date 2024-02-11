@@ -1,6 +1,8 @@
 class BasePage {
-    navigate(path) {
-        cy.visit(path);
+    navigate() {
+        const baseUrl = Cypress.config('baseUrl');
+        cy.log(`Base URL: ${baseUrl}`);
+        cy.visit(baseUrl);
         cy.wait(5000);
     }
 

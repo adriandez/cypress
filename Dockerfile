@@ -45,8 +45,8 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh /usr/local/bin/verify-cypress.s
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
-# Copy the .env file into the Docker image
-COPY .env ./.env
+# Copy the configurations.json file into the Docker image
+COPY configurations.json ./configurations.json
 
 # Copy the rest of your project files into the Docker image
 COPY . .

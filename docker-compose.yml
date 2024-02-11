@@ -3,13 +3,14 @@ services:
   e2e-tests:
     build: .
     container_name: cypress_e2e_tests
-    command: /bin/bash -c "/usr/local/bin/verify-cypress.sh && npx cypress run --headless --browser electron"
+    command: /bin/bash -c "/usr/local/bin/verify-cypress.sh && npm run ${TEST_COMMAND:-test:local}"
     volumes:
       - ./:/app
       - ./cypress/screenshots:/app/cypress/screenshots
       - ./cypress/videos:/app/cypress/videos
     environment:
       - DISPLAY=
+      - TEST_ENV
     logging:
       driver: "json-file"
       options:

@@ -1,0 +1,31 @@
+{
+    "local": {
+      "baseUrl": "http://localhost:3000",
+      "apiEndpoint": "http://localhost:3001/api",
+      "featureFlags": {
+        "newFeature": false
+      }
+    },
+    "develop": {
+        "baseUrl": "https://develop.example.com",
+        "apiEndpoint": "https://develop.example.com/api",
+        "featureFlags": {
+          "newFeature": true
+        }
+      },
+    "testing": {
+      "baseUrl": "https://testing.example.com",
+      "apiEndpoint": "https://testing.example.com/api",
+      "featureFlags": {
+        "newFeature": true
+      }
+    },
+    "preproduction": {
+      "baseUrl": "https://example.com",
+      "apiEndpoint": "https://example.com/api",
+      "featureFlags": {
+        "newFeature": true
+      }
+    }
+}
+  

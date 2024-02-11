@@ -4,9 +4,7 @@ import DemoPage from '../../../../pages/DemoPage';
 const demoPage = new DemoPage();
 
 Given('User is on the webpage', () => {
-  const baseUrl = Cypress.env('baseUrl');
-  cy.log(`Base URL: ${baseUrl}`);
-  demoPage.navigate(baseUrl);
+  demoPage.navigate();
 });
 
 When('User clicks on button', () => {

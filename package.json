@@ -4,19 +4,21 @@
   "description": "Cypress Automation Tests",
   "main": "index.js",
   "scripts": {
-    "test": "cypress run --headless"
+    "test": "cypress run --headless",
+    "test:local": "cross-env TEST_ENV=local cypress run --headless",
+    "test:develop": "cross-env TEST_ENV=develop cypress run --headless",
+    "test:testing": "cross-env TEST_ENV=testing cypress run --headless",
+    "test:preproduction": "cross-env TEST_ENV=preproduction cypress run --headless"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "cypress-cucumber-preprocessor": "^4.3.1",
-    "dotenv": "^16.4.1"
+    "cross-env": "^7.0.3",
+    "cypress": "^13.6.4",
+    "cypress-cucumber-preprocessor": "^4.3.1"
   },
   "cypress-cucumber-preprocessor": {
     "nonGlobalStepdefinitions": false,
     "step_definitions": "cypress/e2e/cucumber/stepDefinitions/*"
-  },
-  "dependencies": {
-    "cypress": "^13.6.4"
   }
 }

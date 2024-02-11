@@ -6,6 +6,9 @@ cypress/fixtures/
 cypress/reports/
 cypress.env.json
 
+# Cypress config
+configurations.json
+
 # Logs
 logs
 *.log
