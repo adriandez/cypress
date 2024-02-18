@@ -12,7 +12,5 @@ When('User clicks on button', () => {
 });
 
 Then('User is on the next page', () => {
-  const assertUrl = Cypress.env('assertUrl');
-  cy.log(`Assert URL: ${assertUrl}`);
-  cy.url().should('eq', assertUrl);
+  demoPage.assertNextPage();
 });
