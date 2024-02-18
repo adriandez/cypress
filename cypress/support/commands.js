@@ -23,3 +23,25 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+Cypress.Commands.add("safeAction", (fn) => {
+    try {
+      return fn();
+    } catch (err) {
+      // Handle error or log
+      cy.log(`Error caught in safeAction: ${err.message}`);
+      throw err; // or handle it differently
+    }
+  });
+
+  Cypress.Commands.add("customLog", (message, { type = 'info', enabled = true } = {}) => {
+    // Check the global loggingEnabled setting from Cypress configuration
+    const loggingEnabled = Cypress.env('loggingEnabled');
+
+    // Only log if enabled both globally and at the call level
+    if (enabled && loggingEnabled !== false) { // Explicit check to allow for undefined
+      const prefix = type === 'start' ? '🚀' : type === 'end' ? '🏁' : 'ℹ️';
+      cy.log(`${prefix} ${message}`);
+      console.log(`${prefix} ${message}`);
+    }
+});
+  

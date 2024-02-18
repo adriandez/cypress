@@ -10,12 +10,13 @@ class DemoPage extends BasePage {
     const data = this.getSelectorData();
     this.getElement(data.demoPage.btnSelector)
       .should('be.visible')
-      .click();
+      .click().then(() => {
+        cy.customLog(`Clicked ${data.demoPage.btnSelector}`, { type: 'info' });
+    });
   }
 
   assertNextPage(){
     const assertUrl = Cypress.env('assertUrl');
-    cy.log(`Assert URL: ${assertUrl}`);
     this.assertEqURL(assertUrl);
   }
   

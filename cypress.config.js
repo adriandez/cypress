@@ -26,5 +26,8 @@ module.exports = defineConfig({
     screenshotsFolder: 'cypress/screenshots',
     screenshotOnRunFailure: true,
     headless: true,
+    env: {
+      loggingEnabled: true,
+    },
   },
 });
