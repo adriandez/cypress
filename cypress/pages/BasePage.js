@@ -9,14 +9,14 @@ class BasePage {
           if (typeof originalMethod === 'function' && methodName !== 'constructor' && methodName !== 'wrapMethodsWithLogging') {
             this[methodName] = function(...args) {
               // Log before the original method execution
-              cy.customLog(`Starting execution: ${methodName}`, { type: 'info' });
+              cy.customLog(`Starting execution: ${methodName}`, { type: 'start' });
               // Wrap the execution in a cy.then() to ensure it's managed in the command queue
               cy.then(() => {
                 // Execute the original method and capture any direct return value (if any)
                 const possibleReturnValue = originalMethod.apply(this, args);
               }).then(() => {
                 // Log after the method execution
-                cy.customLog(`Completed execution: ${methodName}`, { type: 'info' });
+                cy.customLog(`Completed execution: ${methodName}`, { type: 'end' });
               });
             };
           }
