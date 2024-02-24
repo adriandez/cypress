@@ -23,25 +23,49 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
-Cypress.Commands.add("safeAction", (fn) => {
-    try {
-      return fn();
-    } catch (err) {
-      // Handle error or log
-      cy.log(`Error caught in safeAction: ${err.message}`);
-      throw err; // or handle it differently
-    }
-  });
+Cypress.Commands.add('safeAction', (fn) => {
+  try {
+    // Log before attempting the action
+    cy.customLog('Attempting safe action', { type: 'start' })
+    return fn()
+  } catch (err) {
+    // Log the error
+    cy.customLog(`Error caught in safeAction: ${err.message}`, {
+      type: 'error'
+    })
+    throw err
+  } finally {
+    // Log after the action attempt, regardless of success or failure
+    cy.customLog('Completed safe action attempt', { type: 'end' })
+  }
+})
 
-  Cypress.Commands.add("customLog", (message, { type = 'info', enabled = true } = {}) => {
-    // Check the global loggingEnabled setting from Cypress configuration
-    const loggingEnabled = Cypress.env('loggingEnabled');
+Cypress.Commands.add(
+  'customLog',
+  (message, { type = 'info', enabled = true } = {}) => {
+    const loggingEnabled = Cypress.env('loggingEnabled')
+    const logTypes = Cypress.env('logTypes') || {}
 
-    // Only log if enabled both globally and at the call level
-    if (enabled && loggingEnabled !== false) { // Explicit check to allow for undefined
-      const prefix = type === 'start' ? '🚀' : type === 'end' ? '🏁' : 'ℹ️';
-      cy.log(`${prefix} ${message}`);
-      console.log(`${prefix} ${message}`);
+    // Safely determine if the specific log type is enabled
+    const isLogTypeEnabled = Object.prototype.hasOwnProperty.call(
+      logTypes,
+      type
+    )
+      ? logTypes[type]
+      : true
+
+    // Only log if enabled both globally, at the call level, and for the specific log type
+    if (enabled && loggingEnabled !== false && isLogTypeEnabled) {
+      const prefix =
+        type === 'start'
+          ? '🚀'
+          : type === 'end'
+            ? '🏁'
+            : type === 'error'
+              ? '❌'
+              : 'ℹ️' // Added 'error' type handling
+      cy.log(`${prefix} ${message}`)
+      console.log(`${prefix} ${message}`)
     }
-});
-  
+  }
+)

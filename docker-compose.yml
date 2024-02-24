@@ -15,10 +15,10 @@ services:
       - VIEWPORT_HEIGHT=${VIEWPORT_HEIGHT}
       - TEST_BROWSER=chrome
     logging:
-      driver: "json-file"
+      driver: 'json-file'
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: '10m'
+        max-file: '3'
 
   e2e-tests-firefox:
     build: .
@@ -35,7 +35,7 @@ services:
       - VIEWPORT_HEIGHT=${VIEWPORT_HEIGHT}
       - TEST_BROWSER=firefox
     logging:
-      driver: "json-file"
+      driver: 'json-file'
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: '10m'
+        max-file: '3'

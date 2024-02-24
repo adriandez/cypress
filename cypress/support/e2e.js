@@ -20,12 +20,12 @@ import './commands'
 // require('./commands')
 
 before(() => {
-  cy.log('BEFORE');
+  cy.log('BEFORE')
   cy.fixture('selector.json').then((data) => {
-    Cypress.env('selectorData', data);
-  });
-});
+    Cypress.env('selectorData', data)
+  })
+})
 
 after(() => {
   cy.log('AFTER')
-});
+})
