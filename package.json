@@ -4,29 +4,34 @@
   "description": "Cypress Automation Tests",
   "main": "index.js",
   "scripts": {
-    "test": "cypress run --headless",
-    "test:local": "cross-env TEST_ENV=local VIEWPORT_WIDTH=1920 VIEWPORT_HEIGHT=1080 cypress run --headless",
-    "test:develop": "cross-env TEST_ENV=develop VIEWPORT_WIDTH=1920 VIEWPORT_HEIGHT=1080 cypress run --headless",
-    "test:testing": "cross-env TEST_ENV=testing VIEWPORT_WIDTH=1920 VIEWPORT_HEIGHT=1080 cypress run --headless",
-    "test:preproduction": "cross-env TEST_ENV=preproduction VIEWPORT_WIDTH=1920 VIEWPORT_HEIGHT=1080 cypress run --headless",
+    "cytest": "node runCypressTests.js",
+    "test": "node runCypressTests.js",
+    "posttest": "node generate-report.js",
     "lint": "eslint . --ext .js --fix",
     "format": "prettier --write ."
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "cross-env": "^7.0.3",
     "cypress": "^13.6.4",
     "cypress-cucumber-preprocessor": "^4.3.1",
+    "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-cypress": "^2.15.1",
     "eslint-plugin-prettier": "^5.1.3",
-    "minimist": "^1.2.8",
+    "moment": "^2.30.1",
+    "multiple-cucumber-html-reporter": "^3.6.2",
     "prettier": "^3.2.5"
   },
   "cypress-cucumber-preprocessor": {
     "nonGlobalStepdefinitions": false,
-    "step_definitions": "cypress/e2e/cucumber/stepDefinitions/*"
+    "step_definitions": "cypress/e2e/cucumber/stepDefinitions/*",
+    "cucumberJson": {
+      "generate": true,
+      "outputFolder": "cypress/cucumber-json",
+      "filePrefix": "",
+      "fileSuffix": ".cucumber"
+    }
   }
 }

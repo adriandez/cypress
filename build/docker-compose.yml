@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  e2e-tests:
+    build: 
+      context: ../  # Sets the context to the project root
+      dockerfile: build/Dockerfile  # Specifies the path to the Dockerfile from the project root
+    container_name: cypress_e2e_tests
+    command: /bin/bash -c "npm run test"
+    volumes:
+      - ../:/app  # Ensures the volume mappings are correct based on the context
+      - ../cypress/screenshots:/app/cypress/screenshots
+      - ../cypress/videos:/app/cypress/videos
+      - ../cypress/reports:/app/cypress/reports
+      - ../cypress/cucumber-json:/app/cypress/cucumber-json
+    environment:
+      - DISPLAY=:99
+      - TEST_ENV=develop
+      - VIEWPORT_WIDTH=1920
+      - VIEWPORT_HEIGHT=1080
+      - TEST_BROWSER=chrome
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'

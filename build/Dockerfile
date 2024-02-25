@@ -63,8 +63,8 @@ ENV DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
 ENV TERM xterm
 
 # Copy custom scripts into the Docker image and make them executable
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-COPY verify-cypress.sh /usr/local/bin/verify-cypress.sh
+COPY build/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY build/verify-cypress.sh /usr/local/bin/verify-cypress.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh /usr/local/bin/verify-cypress.sh
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
