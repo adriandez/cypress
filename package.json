@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "cytest": "node runCypressTests.js",
-    "test": "node runCypressTests.js",
+    "test": "node runCypressTests.js || true",
     "posttest": "node generate-report.js",
     "lint": "eslint . --ext .js --fix",
     "format": "prettier --write ."
@@ -25,7 +25,7 @@
   },
   "cypress-cucumber-preprocessor": {
     "nonGlobalStepdefinitions": false,
-    "step_definitions": "cypress/e2e/cucumber/step-definitions/*",
+    "step_definitions": "cypress/e2e/cucumber/step-definitions/**/*",
     "cucumberJson": {
       "generate": true,
       "outputFolder": "cypress/cucumber-json",

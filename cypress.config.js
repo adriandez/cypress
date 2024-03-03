@@ -38,7 +38,7 @@ module.exports = defineConfig({
 
       const environmentConfig = getConfig(environment)
       console.log(
-        `-------> Running tests in the '${environment}' environment with config:`,
+        `Running tests in the '${environment}' environment with config:`,
         environmentConfig
       )
 
@@ -50,6 +50,17 @@ module.exports = defineConfig({
       }
 
       config.baseUrl = environmentConfig.baseUrl
+
+      const viewportWidth = process.env.VIEWPORT_WIDTH || 1920
+      const viewportHeight = process.env.VIEWPORT_HEIGHT || 1080
+
+      console.log(
+        `VIEWPORT_WIDTH: ${viewportWidth} and VIEWPORT_HEIGHT: ${viewportHeight}`
+      )
+
+      config.viewportWidth = parseInt(viewportWidth, 10)
+      config.viewportHeight = parseInt(viewportHeight, 10)
+
       return config
     },
     specPattern: 'cypress/e2e/cucumber/feature/*.feature',

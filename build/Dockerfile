@@ -47,7 +47,8 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key
     && apt-get update && apt-get install -y google-chrome-stable && rm -rf /var/lib/apt/lists/*
 
 # Install Firefox
-RUN apt-get update && apt-get install -y firefox-esr && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --fix-missing firefox-esr && rm -rf /var/lib/apt/lists/*
+
 
 # Copy package.json and package-lock.json into the Docker image
 COPY package*.json ./

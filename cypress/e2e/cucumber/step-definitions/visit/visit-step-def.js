@@ -1,5 +1,5 @@
 import { Given, When, Then } from 'cypress-cucumber-preprocessor/steps'
-import * as DemoPageActions from '../../../../support/actions/demo-page-actions'
+import * as DemoPageActions from '../../../../support/actions/demo-page/demo-page-actions'
 
 Given('User is on the webpage', () => {
   DemoPageActions.navigateToPage()

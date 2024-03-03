@@ -23,22 +23,6 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
-Cypress.Commands.add('safeAction', (fn) => {
-  try {
-    // Log before attempting the action
-    cy.customLog('Attempting safe action', { type: 'start' })
-    return fn()
-  } catch (err) {
-    // Log the error
-    cy.customLog(`Error caught in safeAction: ${err.message}`, {
-      type: 'error'
-    })
-    throw err
-  } finally {
-    // Log after the action attempt, regardless of success or failure
-    cy.customLog('Completed safe action attempt', { type: 'end' })
-  }
-})
 
 Cypress.Commands.add(
   'customLog',
@@ -46,7 +30,9 @@ Cypress.Commands.add(
     const loggingEnabled = Cypress.env('loggingEnabled')
     const logTypes = Cypress.env('logTypes') || {}
 
-    // Safely determine if the specific log type is enabled
+    console.log(`loggingEnabled: ${loggingEnabled}`)
+    console.log(`logTypes: ${logTypes}`)
+
     const isLogTypeEnabled = Object.prototype.hasOwnProperty.call(
       logTypes,
       type
@@ -54,7 +40,6 @@ Cypress.Commands.add(
       ? logTypes[type]
       : true
 
-    // Only log if enabled both globally, at the call level, and for the specific log type
     if (enabled && loggingEnabled !== false && isLogTypeEnabled) {
       const prefix =
         type === 'start'
@@ -63,7 +48,7 @@ Cypress.Commands.add(
             ? '🏁'
             : type === 'error'
               ? '❌'
-              : 'ℹ️' // Added 'error' type handling
+              : 'ℹ️'
       cy.log(`${prefix} ${message}`)
       console.log(`${prefix} ${message}`)
     }
