@@ -10,25 +10,35 @@ export const wrapPageActions = (actions, pageName) => {
 
       return cy
         .then(() => {
-          console.log(`Attempting action: ${actionDescription}`)
-          try {
-            const result = originalAction(...args)
-            console.log(`Successfully executed action: ${actionDescription}`)
-            return result
-          } catch (error) {
-            console.error(`Error caught in action: ${actionDescription}`, error)
-            cy.customLog(
-              `Error in action: ${actionDescription} - ${error.message}`,
-              { type: 'error' }
-            )
-            throw error
-          }
+          return new Promise((resolve, reject) => {
+            try {
+              Promise.resolve(originalAction(...args))
+                .then((actionResult) => {
+                  cy.customLog(`Attempting action: ${actionDescription}`, {
+                    type: 'info'
+                  })
+                  resolve(actionResult)
+                })
+                .catch((error) => {
+                  cy.customLog(`Error in action: ${actionDescription}`, {
+                    type: 'error'
+                  })
+                  reject(error)
+                })
+            } catch (error) {
+              cy.customLog(
+                `Error in action: ${actionDescription} - ${error.message}`,
+                { type: 'error' }
+              )
+              throw error
+            }
+          })
         })
-        .then((result) => {
+        .then((finalResult) => {
           cy.customLog(`Completed action: ${actionDescription}`, {
             type: 'end'
           })
-          return result
+          return finalResult
         })
     }
   })

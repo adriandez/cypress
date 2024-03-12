@@ -1,5 +1,7 @@
-require('dotenv').config()
-const report = require('multiple-cucumber-html-reporter')
+import dotenv from 'dotenv'
+import report from 'multiple-cucumber-html-reporter'
+
+dotenv.config()
 
 report.generate({
   jsonDir: './cypress/cucumber-json',

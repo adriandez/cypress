@@ -1,5 +1,7 @@
-require('dotenv').config()
-const { spawn } = require('child_process')
+import dotenv from 'dotenv'
+import { spawn } from 'child_process'
+
+dotenv.config()
 
 const { TEST_BROWSER, TEST_ENV, VIEWPORT_WIDTH, VIEWPORT_HEIGHT } = process.env
 

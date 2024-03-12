@@ -1,5 +1,5 @@
-const { wrapPageActions } = require('../../utilities/action-wrapper')
-const { btnSelector } = require('../../page-objects/demo-page/demo-page')
+import { wrapPageActions } from '../../utilities/action-wrapper.js'
+import { btnSelector } from '../../page-objects/demo-page/demo-page.js'
 
 const pageActions = {
   navigateToPage: () => {
@@ -33,4 +33,4 @@ const pageActions = {
 
 const wrappedPageActions = wrapPageActions(pageActions, 'DemoPage')
 
-module.exports = wrappedPageActions
+export default wrappedPageActions

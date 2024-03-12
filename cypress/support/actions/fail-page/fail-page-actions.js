@@ -1,6 +1,5 @@
-// Assuming wrapPageActions is properly defined in '../../utilities/action-wrapper'
-const { wrapPageActions } = require('../../utilities/action-wrapper')
-const { failSelector } = require('../../page-objects/fail-page/fail-page')
+import { wrapPageActions } from '../../utilities/action-wrapper.js'
+import { failSelector } from '../../page-objects/fail-page/fail-page.js'
 
 const actions = {
   navigateToPageFail: () => {
@@ -31,7 +30,6 @@ const actions = {
   }
 }
 
-// Wrap all actions for the fail page
 const wrappedActions = wrapPageActions(actions, 'FailPage')
 
-module.exports = wrappedActions
+export default wrappedActions

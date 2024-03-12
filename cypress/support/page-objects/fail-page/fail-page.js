@@ -1,3 +1,1 @@
-module.exports = {
-  failSelector: '#failSelector'
-}
+export const failSelector = '#failSelector';

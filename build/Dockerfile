@@ -4,7 +4,7 @@ FROM node:20.11.0
 # Set the working directory in the Docker image
 WORKDIR /app
 
-# Install Xvfb, D-Bus, and other necessary dependencies
+# Install necessary dependencies for running browsers headlessly
 RUN apt-get update && apt-get install -y --no-install-recommends \
     xvfb \
     dbus-x11 \
@@ -18,12 +18,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libasound2 \
     libxtst6 \
     xauth \
-    xvfb \
-    # Install wget and fonts to support headless browser testing
     wget \
     fonts-liberation \
     libappindicator3-1 \
-    libasound2 \
     libatk-bridge2.0-0 \
     libatspi2.0-0 \
     libcups2 \
@@ -36,46 +33,47 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxrandr2 \
     xdg-utils && \
     dbus-uuidgen > /var/lib/dbus/machine-id && \
-    rm -rf /var/lib/apt/lists/* && \
-    npm install -g npm@latest && \
-    # Verify that npm and node are correctly installed
-    node --version && npm --version
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install Google Chrome
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list \
-    && apt-get update && apt-get install -y google-chrome-stable && rm -rf /var/lib/apt/lists/*
+# Declare TEST_BROWSER as an argument
+ARG TEST_BROWSER
 
-# Install Firefox
-RUN apt-get update && apt-get install -y --fix-missing firefox-esr && rm -rf /var/lib/apt/lists/*
-
+# Install Google Chrome or Firefox based on TEST_BROWSER
+RUN if [ "$TEST_BROWSER" = "chrome" ]; then \
+        wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor > /usr/share/keyrings/google-chrome-archive-keyring.gpg && \
+        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-archive-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
+        apt-get update && apt-get install -y google-chrome-stable; \
+    elif [ "$TEST_BROWSER" = "firefox" ]; then \
+        apt-get update && apt-get install -y --fix-missing firefox-esr; \
+    fi && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy package.json and package-lock.json into the Docker image
 COPY package*.json ./
 
+# Update npm to the latest version
+RUN npm install -g npm@latest
+
 # Install project dependencies, including Cypress
 RUN npm ci
 
-# Set up the Xvfb display and add environment variable for D-Bus
-ENV DISPLAY=:
+# Set environment variables
+ENV DISPLAY=:99
 ENV DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+ENV TERM=xterm
 
-# Set TERM environment variable to avoid terminal-related warnings
-ENV TERM xterm
-
-# Copy custom scripts into the Docker image and make them executable
+# Copy custom scripts and make them executable
 COPY build/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 COPY build/verify-cypress.sh /usr/local/bin/verify-cypress.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh /usr/local/bin/verify-cypress.sh
 
+# Set docker-entrypoint.sh as the entrypoint
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-
-# Copy the configurations.json file into the Docker image
-COPY configurations.json ./configurations.json
 
 # Copy the rest of your project files into the Docker image
 COPY . .
 
-# The CMD instruction should be used to run Cypress
-# This is the default command that runs when the container starts
+# Default command to run when starting the container
 CMD ["npx", "cypress", "run", "--headless"]

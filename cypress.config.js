@@ -1,13 +1,20 @@
-const { defineConfig } = require('cypress')
-const cucumber = require('cypress-cucumber-preprocessor').default
-const getConfig = require('./getConfig')
-const fs = require('fs') // Use native fs module for file operations
-require('dotenv').config()
+import { defineConfig } from 'cypress'
+import cucumberPreprocessor from 'cypress-cucumber-preprocessor'
+const cucumber = cucumberPreprocessor.default
+import { getConfig } from './get-config.js'
+import fs from 'fs' // Use native fs module for file operations
+import dotenv from 'dotenv'
+dotenv.config()
 
 // Adding a list of allowed environments for validation
 const allowedEnvironments = ['local', 'develop', 'testing', 'preproduction']
 
-module.exports = defineConfig({
+const environment = process.env.TEST_ENV || 'preproduction'
+const environmentConfig = getConfig(environment)
+
+const enableVideo = process.env.ENABLE_VIDEO !== 'false'
+
+export default defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
       on('file:preprocessor', cucumber())
@@ -26,8 +33,6 @@ module.exports = defineConfig({
         }
       })
 
-      const environment = process.env.TEST_ENV || 'preproduction'
-
       // Validate that the environment is one of the allowed values
       if (!allowedEnvironments.includes(environment)) {
         console.error(
@@ -36,7 +41,6 @@ module.exports = defineConfig({
         process.exit(1) // Exit to avoid running tests with an invalid environment
       }
 
-      const environmentConfig = getConfig(environment)
       console.log(
         `Running tests in the '${environment}' environment with config:`,
         environmentConfig
@@ -65,7 +69,7 @@ module.exports = defineConfig({
     },
     specPattern: 'cypress/e2e/cucumber/feature/*.feature',
     supportFile: 'cypress/support/e2e.js',
-    video: true, // Keep video recording enabled
+    video: enableVideo, // Control video recording based on the .env variable
     videosFolder: 'cypress/videos',
     videoCompression: 32,
     screenshotsFolder: 'cypress/screenshots',
