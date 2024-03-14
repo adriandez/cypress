@@ -13,6 +13,13 @@ const environment = process.env.TEST_ENV || 'preproduction'
 const environmentConfig = getConfig(environment)
 
 const enableVideo = process.env.ENABLE_VIDEO !== 'false'
+const enableLogging = process.env.ENABLE_LOGGING !== 'false'
+const enableStartLog = process.env.ENABLE_START_LOG !== 'false'
+const enableEndLog = process.env.ENABLE_END_LOG !== 'false'
+const enableErrorLog = process.env.ENABLE_ERROR_LOG !== 'false'
+const enableInfoLog = process.env.ENABLE_INFO_LOG !== 'false'
+const enableAttemptingLog = process.env.ENABLE_ATTEMPTING_LOG !== 'false'
+const enableWarningLog = process.env.ENABLE_WARNING_LOG !== 'false'
 
 export default defineConfig({
   e2e: {
@@ -81,7 +88,10 @@ export default defineConfig({
         start: true,
         end: true,
         error: true,
-        info: true
+        info: true,
+        attempting: true,
+        success: true,
+        warning: true
       }
     }
   }

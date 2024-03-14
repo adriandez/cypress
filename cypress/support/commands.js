@@ -23,7 +23,6 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
-
 Cypress.Commands.add(
   'customLog',
   (message, { type = 'info', enabled = true } = {}) => {
@@ -31,24 +30,36 @@ Cypress.Commands.add(
     const logTypes = Cypress.env('logTypes') || {}
 
     console.log(`loggingEnabled: ${loggingEnabled}`)
-    console.log(`logTypes: ${logTypes}`)
+    console.log(`logTypes: ${JSON.stringify(logTypes)}`)
 
-    const isLogTypeEnabled = Object.prototype.hasOwnProperty.call(
-      logTypes,
-      type
-    )
+    const isLogTypeEnabled = logTypes.hasOwnProperty(type)
       ? logTypes[type]
       : true
 
     if (enabled && loggingEnabled !== false && isLogTypeEnabled) {
-      const prefix =
-        type === 'start'
-          ? '🚀'
-          : type === 'end'
-            ? '🏁'
-            : type === 'error'
-              ? '❌'
-              : 'ℹ️'
+      let prefix
+      switch (type) {
+        case 'start':
+          prefix = '🚀'
+          break
+        case 'end':
+          prefix = '🏁'
+          break
+        case 'error':
+          prefix = '❌'
+          break
+        case 'attempting':
+          prefix = '🔍'
+          break
+        case 'success':
+          prefix = '✅'
+          break
+        case 'warning':
+          prefix = '⚠️'
+          break
+        default:
+          prefix = 'ℹ️'
+      }
       cy.log(`${prefix} ${message}`)
       console.log(`${prefix} ${message}`)
     }
