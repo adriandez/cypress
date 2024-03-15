@@ -23,45 +23,46 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
-Cypress.Commands.add(
-  'customLog',
-  (message, { type = 'info', enabled = true } = {}) => {
-    const loggingEnabled = Cypress.env('loggingEnabled')
-    const logTypes = Cypress.env('logTypes') || {}
+Cypress.Commands.add('customLog', (message, { type = 'info', enabled = true } = {}) => {
+  const loggingEnabled = Cypress.env('loggingEnabled'); // Global logging switch
+  const logTypes = Cypress.env('logTypes') || {};
 
-    console.log(`loggingEnabled: ${loggingEnabled}`)
-    console.log(`logTypes: ${JSON.stringify(logTypes)}`)
+  // Ensure the log type is considered enabled if not explicitly set in `logTypes`.
+  const isLogTypeEnabled = logTypes.hasOwnProperty(type) ? logTypes[type] : true;
 
-    const isLogTypeEnabled = logTypes.hasOwnProperty(type)
-      ? logTypes[type]
-      : true
+  cy.log(`loggingEnabled: ${loggingEnabled}`);
+  cy.log(`enabled: ${enabled}`);
+  cy.log(`isLogTypeEnabled: ${isLogTypeEnabled}`);
+  cy.log(true !== false && (false || false));
+  cy.log(loggingEnabled !== false && (enabled || isLogTypeEnabled));
 
-    if (enabled && loggingEnabled !== false && isLogTypeEnabled) {
-      let prefix
+  // Log if globally enabled, the action's logging is not explicitly disabled, and the log type is enabled.
+  if (loggingEnabled !== false && enabled && isLogTypeEnabled) {
+      let prefix;
       switch (type) {
-        case 'start':
-          prefix = '🚀'
-          break
-        case 'end':
-          prefix = '🏁'
-          break
-        case 'error':
-          prefix = '❌'
-          break
-        case 'attempting':
-          prefix = '🔍'
-          break
-        case 'success':
-          prefix = '✅'
-          break
-        case 'warning':
-          prefix = '⚠️'
-          break
-        default:
-          prefix = 'ℹ️'
+          case 'start':
+              prefix = '🚀';
+              break;
+          case 'end':
+              prefix = '🏁';
+              break;
+          case 'error':
+              prefix = '❌';
+              break;
+          case 'attempting':
+              prefix = '🔍';
+              break;
+          case 'success':
+              prefix = '✅';
+              break;
+          case 'warning':
+              prefix = '⚠️';
+              break;
+          default:
+              prefix = 'ℹ️';
       }
-      cy.log(`${prefix} ${message}`)
-      console.log(`${prefix} ${message}`)
-    }
+      cy.log(`${prefix} ${message}`);
+      console.log(`${prefix} ${message}`);
   }
-)
+});
+

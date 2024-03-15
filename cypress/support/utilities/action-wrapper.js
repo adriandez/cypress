@@ -12,11 +12,11 @@ export const wrapPageActions = (actions, pageName) => {
         .then(() => {
           return new Promise((resolve, reject) => {
             try {
+              cy.customLog(`Attempting action: ${actionDescription}`, {
+                type: 'attempting', enabled: true
+              })
               Promise.resolve(originalAction(...args))
                 .then((actionResult) => {
-                  cy.customLog(`Attempting action: ${actionDescription}`, {
-                    type: 'info'
-                  })
                   resolve(actionResult)
                 })
                 .catch((error) => {
