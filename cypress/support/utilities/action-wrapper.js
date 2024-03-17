@@ -6,14 +6,18 @@ export const wrapPageActions = (actions, pageName) => {
 
     wrappedActions[actionKey] = (...args) => {
       const actionDescription = `${pageName}.${actionKey}`
-      cy.customLog(`Starting action: ${actionDescription}`, { type: 'start' })
+      cy.customLog(`Starting action: ${actionDescription}`, {
+        type: 'start',
+        enabled: true
+      })
 
       return cy
         .then(() => {
           return new Promise((resolve, reject) => {
             try {
               cy.customLog(`Attempting action: ${actionDescription}`, {
-                type: 'attempting', enabled: true
+                type: 'attempting',
+                enabled: true
               })
               Promise.resolve(originalAction(...args))
                 .then((actionResult) => {

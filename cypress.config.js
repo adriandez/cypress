@@ -1,51 +1,64 @@
 import { defineConfig } from 'cypress'
 import cucumberPreprocessor from 'cypress-cucumber-preprocessor'
-const cucumber = cucumberPreprocessor.default
 import { getConfig } from './get-config.js'
-import fs from 'fs' // Use native fs module for file operations
+import fs from 'fs/promises'
 import dotenv from 'dotenv'
 dotenv.config()
 
-// Adding a list of allowed environments for validation
 const allowedEnvironments = ['local', 'develop', 'testing', 'preproduction']
+const logTypes = [
+  'start',
+  'end',
+  'error',
+  'info',
+  'attempting',
+  'success',
+  'warning'
+]
 
-const environment = process.env.TEST_ENV || 'preproduction'
-const environmentConfig = getConfig(environment)
+const validateEnvironment = (environment) => {
+  if (!allowedEnvironments.includes(environment)) {
+    console.error(
+      `Error: '${environment}' is not a valid TEST_ENV value. Allowed values are: ${allowedEnvironments.join(', ')}.`
+    )
+    process.exit(1)
+  }
+}
 
-const enableVideo = process.env.ENABLE_VIDEO !== 'false'
-const enableLogging = process.env.ENABLE_LOGGING !== 'false'
-const enableStartLog = process.env.ENABLE_START_LOG !== 'false'
-const enableEndLog = process.env.ENABLE_END_LOG !== 'false'
-const enableErrorLog = process.env.ENABLE_ERROR_LOG !== 'false'
-const enableInfoLog = process.env.ENABLE_INFO_LOG !== 'false'
-const enableAttemptingLog = process.env.ENABLE_ATTEMPTING_LOG !== 'false'
-const enableWarningLog = process.env.ENABLE_WARNING_LOG !== 'false'
+const getLogFlags = () =>
+  logTypes.reduce(
+    (acc, logType) => ({
+      ...acc,
+      [logType]: process.env[`ENABLE_${logType.toUpperCase()}_LOG`] !== 'false'
+    }),
+    {}
+  )
 
 export default defineConfig({
   e2e: {
-    setupNodeEvents(on, config) {
-      on('file:preprocessor', cucumber())
+    async setupNodeEvents(on, config) {
+      on('file:preprocessor', cucumberPreprocessor.default())
 
-      // After a spec is run, delete the video if there were no failures
-      on('after:spec', (spec, results) => {
-        if (results && results.video) {
-          // Check if there are any failing tests
-          const failures = results.tests.some((test) =>
+      on('after:spec', async (spec, results) => {
+        if (
+          results.video &&
+          !results.tests.some((test) =>
             test.attempts.some((attempt) => attempt.state === 'failed')
           )
-          if (!failures) {
-            // Delete the video if the spec passed and no tests retried
-            fs.unlinkSync(results.video)
-          }
+        ) {
+          await fs.unlink(results.video).catch(console.error)
         }
       })
 
-      // Validate that the environment is one of the allowed values
-      if (!allowedEnvironments.includes(environment)) {
+      const environment = process.env.TEST_ENV || 'preproduction'
+      validateEnvironment(environment)
+
+      const environmentConfig = getConfig(environment)
+      if (!environmentConfig?.baseUrl) {
         console.error(
-          `Error: '${environment}' is not a valid TEST_ENV value. Allowed values are: ${allowedEnvironments.join(', ')}.`
+          `Error: No 'baseUrl' found for environment '${environment}'. Please check your configurations.`
         )
-        process.exit(1) // Exit to avoid running tests with an invalid environment
+        process.exit(1)
       }
 
       console.log(
@@ -53,46 +66,28 @@ export default defineConfig({
         environmentConfig
       )
 
-      if (!environmentConfig || !environmentConfig.baseUrl) {
-        console.error(
-          `Error: No 'baseUrl' found for environment '${environment}'. Please check your configurations.json.`
-        )
-        process.exit(1) // Exit to avoid running tests without baseUrl
-      }
-
       config.baseUrl = environmentConfig.baseUrl
-
-      const viewportWidth = process.env.VIEWPORT_WIDTH || 1920
-      const viewportHeight = process.env.VIEWPORT_HEIGHT || 1080
-
-      console.log(
-        `VIEWPORT_WIDTH: ${viewportWidth} and VIEWPORT_HEIGHT: ${viewportHeight}`
+      config.viewportWidth = parseInt(process.env.VIEWPORT_WIDTH || '1920', 10)
+      config.viewportHeight = parseInt(
+        process.env.VIEWPORT_HEIGHT || '1080',
+        10
       )
 
-      config.viewportWidth = parseInt(viewportWidth, 10)
-      config.viewportHeight = parseInt(viewportHeight, 10)
-
-      return config
+      return {
+        ...config,
+        video: process.env.ENABLE_VIDEO !== 'false',
+        env: {
+          loggingEnabled: process.env.ENABLE_LOGGING !== 'false',
+          logTypes: getLogFlags()
+        }
+      }
     },
-    specPattern: 'cypress/e2e/cucumber/feature/*.feature',
+    specPattern: 'cypress/e2e/cucumber/feature/**/*.feature',
     supportFile: 'cypress/support/e2e.js',
-    video: enableVideo, // Control video recording based on the .env variable
-    videosFolder: 'cypress/videos',
     videoCompression: 32,
+    videosFolder: 'cypress/videos',
     screenshotsFolder: 'cypress/screenshots',
     screenshotOnRunFailure: true,
-    headless: true,
-    env: {
-      loggingEnabled: true,
-      logTypes: {
-        start: true,
-        end: true,
-        error: true,
-        info: true,
-        attempting: true,
-        success: true,
-        warning: true
-      }
-    }
+    headless: true
   }
 })
