@@ -1,11 +1,11 @@
 version: '3.8'
 services:
   e2e-tests-chrome:
-    build: 
-      context: ../  
+    build:
+      context: ../
       dockerfile: build/Dockerfile
       args:
-        TEST_BROWSER: chrome
+        INSTALL_BROWSER: chrome
     container_name: cypress_e2e_tests_chrome
     command: /bin/bash -c "npm run test"
     volumes:
@@ -19,20 +19,29 @@ services:
       - TEST_ENV=develop
       - VIEWPORT_WIDTH=1920
       - VIEWPORT_HEIGHT=1080
+      - INSTALL_BROWSER=chrome
       - TEST_BROWSER=chrome
       - ENABLE_VIDEO=true
+      - LOG_LEVEL=4
+      - ENABLE_START_LOG=true
+      - ENABLE_END_LOG=true
+      - ENABLE_ERROR_LOG=true
+      - ENABLE_INFO_LOG=true
+      - ENABLE_ATTEMPTING_LOG=true
+      - ENABLE_SUCCESS_LOG=true
+      - ENABLE_WARNING_LOG=true
     logging:
       driver: 'json-file'
       options:
         max-size: '10m'
         max-file: '3'
-
+      
   e2e-tests-firefox:
-    build: 
-      context: ../  
+    build:
+      context: ../
       dockerfile: build/Dockerfile
       args:
-        TEST_BROWSER: firefox
+        INSTALL_BROWSER: firefox
     container_name: cypress_e2e_tests_firefox
     command: /bin/bash -c "npm run test"
     volumes:
@@ -46,8 +55,53 @@ services:
       - TEST_ENV=develop
       - VIEWPORT_WIDTH=1920
       - VIEWPORT_HEIGHT=1080
+      - INSTALL_BROWSER=firefox
       - TEST_BROWSER=firefox
       - ENABLE_VIDEO=false
+      - LOG_LEVEL=4
+      - ENABLE_START_LOG=true
+      - ENABLE_END_LOG=true
+      - ENABLE_ERROR_LOG=true
+      - ENABLE_INFO_LOG=true
+      - ENABLE_ATTEMPTING_LOG=true
+      - ENABLE_SUCCESS_LOG=true
+      - ENABLE_WARNING_LOG=true
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  e2e-tests-edge:
+    build:
+      context: ../  
+      dockerfile: build/Dockerfile
+      args:
+        INSTALL_BROWSER: edge
+    container_name: cypress_e2e_tests_edge
+    command: /bin/bash -c "npm run test"
+    volumes:
+      - ../:/app
+      - ../cypress/screenshots:/app/cypress/screenshots
+      - ../cypress/videos:/app/cypress/videos
+      - ../cypress/reports:/app/cypress/reports
+      - ../cypress/cucumber-json:/app/cypress/cucumber-json
+    environment:
+      - DISPLAY=:99
+      - TEST_ENV=develop
+      - VIEWPORT_WIDTH=1920
+      - VIEWPORT_HEIGHT=1080
+      - INSTALL_BROWSER=edge
+      - TEST_BROWSER=edge
+      - ENABLE_VIDEO=true
+      - LOG_LEVEL=4
+      - ENABLE_START_LOG=true
+      - ENABLE_END_LOG=true
+      - ENABLE_ERROR_LOG=true
+      - ENABLE_INFO_LOG=true
+      - ENABLE_ATTEMPTING_LOG=true
+      - ENABLE_SUCCESS_LOG=true
+      - ENABLE_WARNING_LOG=true
     logging:
       driver: 'json-file'
       options:
