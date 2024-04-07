@@ -25,6 +25,7 @@ RUN npm ci
 ENV DISPLAY=:99
 ENV DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
 ENV TERM=xterm
+ENV XDG_RUNTIME_DIR=/tmp
 
 # Copy custom scripts and make them executable
 COPY build/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh

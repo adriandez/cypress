@@ -72,3 +72,13 @@ Cypress.Commands.add(
     }
   }
 )
+
+Cypress.Commands.add('safeReadFile', (filePath, options = 'utf8') => {
+  return cy.task('readFileIfExists', { filePath, options }).then((content) => {
+    if (content === null) {
+      cy.log(`File not found: ${filePath}`);
+      return null;
+    }
+    return content;
+  });
+});
