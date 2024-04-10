@@ -1,4 +1,4 @@
-Feature: Visit 2
+Feature: Visit2
 
 Scenario: Visit and click button 2
     Given User is on the webpage 2

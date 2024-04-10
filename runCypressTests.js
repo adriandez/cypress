@@ -3,8 +3,9 @@ import { spawn } from 'child_process'
 
 dotenv.config()
 
-const { TEST_BROWSER, TEST_ENV, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, FOCUS } =
-  process.env
+const { TEST_BROWSER, TEST_ENV, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, FOCUS, TAG, FEATURE } = process.env;
+const featureName = FEATURE || '*';
+const tagName = TAG || 'focus';
 
 // Simple validation/sanitization. Add more rules as needed.
 const isSafe = (str) => /^[\w-]+$/.test(str)
@@ -23,6 +24,8 @@ const cypressCommand = 'npx'
 let cypressArgs = [
   'cypress',
   'run',
+  '--spec',
+  `cypress/e2e/cucumber/feature/**/${featureName}.feature`,
   '--headless',
   '--browser',
   TEST_BROWSER,
@@ -33,7 +36,7 @@ let cypressArgs = [
 // Conditionally add a tag if FOCUS is true
 if (FOCUS === 'true') {
   cypressArgs.push('--env')
-  cypressArgs.push(`TAGS=@focus`)
+  cypressArgs.push(`TAGS=@${tagName}`)
 }
 
 console.log(`Executing: ${cypressCommand} ${cypressArgs.join(' ')}`)
