@@ -6,7 +6,8 @@
   "main": "index.js",
   "scripts": {
     "cytest": "node runCypressTests.js",
-    "pretest": "node reset-directory.js",
+    "clearReports":"node reset-directory.js --reset cypress/reports",
+    "pretest": "node reset-directory.js --reset cypress/cucumber-json",
     "test": "node runCypressTests.js || true",
     "posttest": "node generate-report.js",
     "lint": "eslint . --ext .js --fix",
@@ -24,6 +25,7 @@
     "eslint-plugin-prettier": "^5.1.3",
     "moment": "^2.30.1",
     "multiple-cucumber-html-reporter": "^3.6.2",
+    "yargs": "^17.7.2",
     "prettier": "^3.2.5"
   },
   "cypress-cucumber-preprocessor": {

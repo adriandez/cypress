@@ -2,11 +2,24 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const directoryPath = path.join(__dirname, 'cypress', 'cucumber-json');
+// Parse command line arguments
+const argv = yargs(hideBin(process.argv))
+  .option('reset', {
+    describe: 'Relative path to the folder to delete and recreate',
+    type: 'string',
+    demandOption: true
+  })
+  .help()
+  .alias('help', 'h')
+  .parse();
+
+const directoryPath = path.join(__dirname, argv.reset);
 
 async function deleteDirectory(directory) {
   if (await fs.stat(directory).catch(() => false)) {
