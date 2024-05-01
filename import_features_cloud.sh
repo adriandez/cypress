@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# Define the base URL and authentication keys
-BASE_URL="https://xray.cloud.getxray.app"
-KEYS="DEMO-15;DEMO-16;DEMO-17;DEMO-18"
-PROJECT="DEMO"
-
-# Directory to store the downloaded zip and extracted files
-EXPORT_DIR="cloud-import"
+# Load environment variables from .env file
+set -a
+if ! source .env; then
+    echo "Error: Failed to load environment variables from .env file." >&2
+    exit 1
+fi
+set +a
 
 # Create the directory if it does not exist
-mkdir -p "$EXPORT_DIR"
+mkdir -p "$EXPORT_DIR" || { echo "Error: Failed to create directory $EXPORT_DIR"; exit 1; }
 
 echo "Zipping feature files from cypress/e2e/cucumber/feature..."
 if zip -r "$EXPORT_DIR/features.zip" cypress/e2e/cucumber/feature/ -i \*.feature; then
@@ -21,7 +21,7 @@ else
 fi
 
 echo "Authenticating with Xray API..."
-token=$(curl -H "Content-Type: application/json" -X POST --data @"cloud_auth.json" "$BASE_URL/api/v1/authenticate" | tr -d '"')
+token=$(curl -H "Content-Type: application/json" -X POST --data @"cloud_auth.json" "$BASE_URL/api/v2/authenticate" | tr -d '"')
 
 if [ -z "$token" ]; then
     echo "Failed to retrieve authentication token. Check cloud_auth.json and API connectivity."
@@ -30,7 +30,7 @@ fi
 echo "Authentication successful. Token received."
 
 echo "Uploading feature files to Xray..."
-response=$(curl -s -H "Content-Type: multipart/form-data" -H "Authorization: Bearer $token" -F "file=@$EXPORT_DIR/features.zip" "$BASE_URL/api/v1/import/feature?projectKey=$PROJECT")
+response=$(curl -s -H "Content-Type: multipart/form-data" -H "Authorization: Bearer $token" -F "file=@$EXPORT_DIR/features.zip" "$BASE_URL/api/v2/import/feature?projectKey=$PROJECT")
 
 # Error checking based on the presence of "error" key in the response
 if echo "$response" | grep -q '"error"'; then

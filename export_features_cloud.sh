@@ -1,42 +1,37 @@
 #!/bin/bash
 
-# Define the base URL and authentication keys
-BASE_URL="https://xray.cloud.getxray.app"
-KEYS="DEMO-15;DEMO-16;DEMO-17;DEMO-18"
-
-# Directory to store the downloaded zip and extracted files
-EXPORT_DIR="cloud-export"
-PROJECT_FEATURE_DIR="cypress/e2e/cucumber/feature"
+# Load environment variables from .env file
+set -a
+if ! source .env; then
+    echo "Error: Failed to load environment variables from .env file." >&2
+    exit 1
+fi
+set +a
 
 # Create the directory if it does not exist
-mkdir -p "$EXPORT_DIR"
+mkdir -p "$EXPORT_DIR" || { echo "Error: Failed to create directory $EXPORT_DIR"; exit 1; }
 
 echo "Authenticating with Xray API..."
 # Authenticate and retrieve a token
-token=$(curl -H "Content-Type: application/json" -X POST --data @"cloud_auth.json" $BASE_URL/api/v2/authenticate | tr -d '"')
-
+token=$(curl -s -H "Content-Type: application/json" -X POST --data @"cloud_auth.json" "$BASE_URL/api/v2/authenticate" | tr -d '"')
 if [ -z "$token" ]; then
-    echo "Failed to retrieve authentication token. Check cloud_auth.json and API connectivity."
+    echo "Failed to retrieve authentication token. Check cloud_auth.json and API connectivity." >&2
     exit 1
 fi
 echo "Authentication successful. Token received."
 
 echo "Downloading feature files..."
 # Download the zip file containing the feature files
-curl -H "Content-Type: application/json" -X GET -H "Authorization: Bearer $token" "$BASE_URL/api/v2/export/cucumber?keys=$KEYS" -o "$EXPORT_DIR/features.zip"
-
-if [ $? -ne 0 ]; then
-    echo "Failed to download feature files. Check API settings and network connection."
+if ! curl -s -H "Content-Type: application/json" -H "Authorization: Bearer $token" -X GET "$BASE_URL/api/v2/export/cucumber?keys=$KEYS" -o "$EXPORT_DIR/features.zip"; then
+    echo "Failed to download feature files. Check API settings and network connection." >&2
     exit 1
 fi
 echo "Download successful."
 
 echo "Unzipping feature files..."
 # Unzip the features.zip into the specified directory
-unzip -o "$EXPORT_DIR/features.zip" -d "$EXPORT_DIR/"
-
-if [ $? -ne 0 ]; then
-    echo "Failed to unzip feature files. Check the integrity of features.zip."
+if ! unzip -o "$EXPORT_DIR/features.zip" -d "$EXPORT_DIR/"; then
+    echo "Failed to unzip feature files. Check the integrity of features.zip." >&2
     exit 1
 fi
 echo "Unzipping successful."
@@ -45,31 +40,25 @@ echo "Renaming extracted files to remove numbering..."
 # Remove numerical prefixes from the filenames
 cd "$EXPORT_DIR"
 for f in *.feature; do
-    mv "$f" "$(echo $f | sed -E 's/^[0-9]+_(DEMO-[0-9]+\.feature)$/\1/')"
+    mv "$f" "$(echo $f | sed -E "s/^[0-9]+_($KEY-[0-9]+\.feature)$/\1/")"
 done
 cd ..
 
-echo "Searching for matching feature files in the project directory based on KEY-NUM prefix..."
+echo "Processing feature files..."
 # Loop through each feature file in the export directory
 for export_file in "$EXPORT_DIR"/*.feature; do
     # Extract just the filename from the path
     export_filename=$(basename "$export_file")
     # Extract the KEY-NUM prefix (e.g., DEMO-18) from the filename
-    key_num=$(echo "$export_filename" | grep -oE '^DEMO-[0-9]+')
+    key_num=$(echo "$export_filename" | grep -oE "^$KEY-[0-9]+")
 
     echo "Searching for matches for $key_num in $PROJECT_FEATURE_DIR..."
-
     # Find matching feature files in the project feature directory that start with the same KEY-NUM prefix
-    find "$PROJECT_FEATURE_DIR" -type f -name "$key_num*.feature" | while read matching_file; do
-        if [ -n "$matching_file" ]; then
-            echo "Match found: $matching_file"
-            # Move the file from cloud-export to the matching file's location
-            mv "$export_file" "$matching_file"
-            echo "Moved $export_file to $matching_file"
-        else
-            echo "No match found for files starting with $key_num"
-        fi
-    done
+    if find "$PROJECT_FEATURE_DIR" -type f -name "$key_num*.feature" -print0 | xargs -0 -I {} sh -c 'mv "$1" "$2" && echo "Moved $1 to $2" || echo "Failed to move $1 to $2"' _ "$export_file" {}; then
+        echo "Processing of $export_file completed."
+    else
+        echo "Failed to process $export_file or no matches found." >&2
+    fi
 done
 
 echo "Feature file processing complete."
