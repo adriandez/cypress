@@ -13,6 +13,11 @@ configurations.json
 # Cloud Auth
 cloud_auth.json
 
+# Cloud Export / Import folders
+cloud-export/
+cloud-import/
+cloud-import-results/
+
 # Logs
 logs
 *.log
