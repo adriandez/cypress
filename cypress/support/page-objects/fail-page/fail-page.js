@@ -1,1 +1,1 @@
-export const failSelector = '#failSelector'
+export const failSelector = '#failSelector';

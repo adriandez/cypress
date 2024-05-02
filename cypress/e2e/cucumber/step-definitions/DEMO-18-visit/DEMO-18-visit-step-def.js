@@ -1,14 +1,14 @@
-import { Given, When, Then } from 'cypress-cucumber-preprocessor/steps'
-import * as DemoPageActions from '../../../../support/actions/demo-page/demo-page-actions'
+import { Given, When, Then } from 'cypress-cucumber-preprocessor/steps';
+import * as DemoPageActions from '../../../../support/actions/demo-page/demo-page-actions';
 
 Given('User is on the webpage', () => {
-  DemoPageActions.navigateToPage()
-})
+  DemoPageActions.navigateToPage();
+});
 
 When('User clicks on button', () => {
-  DemoPageActions.userClicksOnButton()
-})
+  DemoPageActions.userClicksOnButton();
+});
 
 Then('User is on the next page', () => {
-  DemoPageActions.userIsOnNextPage()
-})
+  DemoPageActions.userIsOnNextPage();
+});

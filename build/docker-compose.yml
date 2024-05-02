@@ -30,6 +30,13 @@ services:
       - ENABLE_ATTEMPTING_LOG=true
       - ENABLE_SUCCESS_LOG=true
       - ENABLE_WARNING_LOG=true
+      - XRAY_API_BASE_URL=https://xray.cloud.getxray.app
+      - KEYS="DEMO-15;DEMO-16;DEMO-17;DEMO-18"
+      - EXPORT_DIR=cloud-export
+      - PROJECT_FEATURE_DIR=cypress/e2e/cucumber/feature
+      - KEY=DEMO
+      - PROJECT=DEMO
+      - DIRECTORY="./cloud-import-results"
     logging:
       driver: 'json-file'
       options:
@@ -66,6 +73,13 @@ services:
       - ENABLE_ATTEMPTING_LOG=true
       - ENABLE_SUCCESS_LOG=true
       - ENABLE_WARNING_LOG=true
+      - XRAY_API_BASE_URL=https://xray.cloud.getxray.app
+      - KEYS="DEMO-15;DEMO-16;DEMO-17;DEMO-18"
+      - EXPORT_DIR=cloud-export
+      - PROJECT_FEATURE_DIR=cypress/e2e/cucumber/feature
+      - KEY=DEMO
+      - PROJECT=DEMO
+      - DIRECTORY="./cloud-import-results"
     logging:
       driver: 'json-file'
       options:
@@ -102,6 +116,13 @@ services:
       - ENABLE_ATTEMPTING_LOG=true
       - ENABLE_SUCCESS_LOG=true
       - ENABLE_WARNING_LOG=true
+      - XRAY_API_BASE_URL=https://xray.cloud.getxray.app
+      - KEYS="DEMO-15;DEMO-16;DEMO-17;DEMO-18"
+      - EXPORT_DIR=cloud-export
+      - PROJECT_FEATURE_DIR=cypress/e2e/cucumber/feature
+      - KEY=DEMO
+      - PROJECT=DEMO
+      - DIRECTORY="./cloud-import-results"
     logging:
       driver: 'json-file'
       options:

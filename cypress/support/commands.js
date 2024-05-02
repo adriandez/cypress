@@ -26,8 +26,8 @@
 Cypress.Commands.add(
   'customLog',
   (message, { type = 'info', enabled = true } = {}) => {
-    const loggingEnabled = Cypress.env('loggingEnabled') // Global logging switch
-    const logLevel = Cypress.env('logLevel') || 0 // Default log level to 0 if not set
+    const loggingEnabled = Cypress.env('loggingEnabled'); // Global logging switch
+    const logLevel = Cypress.env('logLevel') || 0; // Default log level to 0 if not set
     const logTypes = {
       error: 1, // Log level 1 - Errors
       warning: 1, // Log level 1 - Warnings
@@ -37,41 +37,41 @@ Cypress.Commands.add(
       success: 3, // Log level 3 - Success actions
       // Future or other types can be added here as needed
       info: 4 // Log level 4 - Informational messages
-    }
+    };
 
     // Determine if the type of log message is enabled based on the current log level
     const isTypeEnabled =
-      logTypes[type] !== undefined && logLevel >= logTypes[type]
+      logTypes[type] !== undefined && logLevel >= logTypes[type];
 
     if (loggingEnabled !== false && enabled && isTypeEnabled) {
-      let prefix
+      let prefix;
       switch (type) {
         case 'start':
-          prefix = '🚀'
-          break
+          prefix = '🚀';
+          break;
         case 'end':
-          prefix = '🏁'
-          break
+          prefix = '🏁';
+          break;
         case 'error':
-          prefix = '❌'
-          break
+          prefix = '❌';
+          break;
         case 'attempting':
-          prefix = '🔍'
-          break
+          prefix = '🔍';
+          break;
         case 'success':
-          prefix = '✅'
-          break
+          prefix = '✅';
+          break;
         case 'warning':
-          prefix = '⚠️'
-          break
+          prefix = '⚠️';
+          break;
         default:
-          prefix = 'ℹ️'
+          prefix = 'ℹ️';
       }
-      cy.log(`${prefix} ${message}`)
-      console.log(`${prefix} ${message}`)
+      cy.log(`${prefix} ${message}`);
+      console.log(`${prefix} ${message}`);
     }
   }
-)
+);
 
 Cypress.Commands.add('safeReadFile', (filePath, options = 'utf8') => {
   return cy.task('readFileIfExists', { filePath, options }).then((content) => {

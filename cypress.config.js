@@ -7,7 +7,15 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const allowedEnvironments = ['local', 'develop', 'testing', 'preproduction'];
-const logTypes = ['start', 'end', 'error', 'info', 'attempting', 'success', 'warning'];
+const logTypes = [
+  'start',
+  'end',
+  'error',
+  'info',
+  'attempting',
+  'success',
+  'warning'
+];
 
 const validateEnvironment = (environment) => {
   if (!allowedEnvironments.includes(environment)) {
@@ -22,7 +30,7 @@ const getLogFlags = () =>
   logTypes.reduce(
     (acc, logType) => ({
       ...acc,
-      [logType]: process.env[`ENABLE_${logType.toUpperCase()}_LOG`] !== 'false',
+      [logType]: process.env[`ENABLE_${logType.toUpperCase()}_LOG`] !== 'false'
     }),
     {}
   );
@@ -46,7 +54,9 @@ export default defineConfig({
       // Task for reading file if exists
       on('task', {
         readFileIfExists({ filePath, options = 'utf8' }) {
-          console.log(`Attempting to read file at path: ${filePath} with options: ${options}`); // Added log
+          console.log(
+            `Attempting to read file at path: ${filePath} with options: ${options}`
+          ); // Added log
           if (fs.existsSync(filePath)) {
             console.log(`File exists. Reading now.`); // Added log
             return fs.readFileSync(filePath, options);
@@ -54,7 +64,7 @@ export default defineConfig({
             console.log(`File not found at path: ${filePath}`); // Added log
           }
           return null; // File does not exist
-        },
+        }
       });
 
       if (process.env.TEST_BROWSER === 'edge') {
@@ -84,13 +94,20 @@ export default defineConfig({
       const isFirefox = process.env.TEST_BROWSER === 'firefox';
       const enableVideo = process.env.ENABLE_VIDEO !== 'false' && !isFirefox;
 
-      const enableScreenshotsFail = process.env.ENABLE_SCREENSHOTS_FAIL !== 'false';
+      const enableScreenshotsFail =
+        process.env.ENABLE_SCREENSHOTS_FAIL !== 'false';
 
-      console.log(`Running tests in the '${environment}' environment with config:`, environmentConfig);
+      console.log(
+        `Running tests in the '${environment}' environment with config:`,
+        environmentConfig
+      );
 
       config.baseUrl = environmentConfig.baseUrl;
       config.viewportWidth = parseInt(process.env.VIEWPORT_WIDTH || '1920', 10);
-      config.viewportHeight = parseInt(process.env.VIEWPORT_HEIGHT || '1080', 10);
+      config.viewportHeight = parseInt(
+        process.env.VIEWPORT_HEIGHT || '1080',
+        10
+      );
 
       return {
         ...config,
@@ -99,8 +116,8 @@ export default defineConfig({
         env: {
           loggingEnabled: process.env.ENABLE_LOGGING !== 'false',
           logLevel: parseInt(process.env.LOG_LEVEL || '0', 10),
-          logTypes: getLogFlags(),
-        },
+          logTypes: getLogFlags()
+        }
       };
     },
     specPattern: 'cypress/e2e/cucumber/feature/**/*.feature',
@@ -108,6 +125,6 @@ export default defineConfig({
     videoCompression: 32,
     videosFolder: 'cypress/videos',
     screenshotsFolder: 'cypress/screenshots',
-    headless: true,
-  },
+    headless: true
+  }
 });

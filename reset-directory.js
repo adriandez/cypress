@@ -11,7 +11,7 @@ const __dirname = dirname(__filename);
 // Parse command line arguments
 const argv = yargs(hideBin(process.argv))
   .option('reset', {
-    describe: 'Relative path to the folder to delete and recreate',
+    describe: 'Relative paths to the folders to delete and recreate',
     type: 'string',
     demandOption: true
   })
@@ -19,40 +19,46 @@ const argv = yargs(hideBin(process.argv))
   .alias('help', 'h')
   .parse();
 
-const directoryPath = path.join(__dirname, argv.reset);
+const directories = argv.reset
+  .split(',')
+  .map((directory) => path.join(__dirname, directory.trim()));
 
-async function deleteDirectory(directory) {
+const deleteDirectoryContents = async (directory) => {
   if (await fs.stat(directory).catch(() => false)) {
-    console.log(`Directory exists, deleting: ${directory}`);
+    console.log(`Directory exists, deleting contents: ${directory}`);
     const files = await fs.readdir(directory);
-    await Promise.all(files.map(async (file) => {
-      const curPath = path.join(directory, file);
-      const stat = await fs.lstat(curPath);
-      if (stat.isDirectory()) {
-        console.log(`Entering directory: ${curPath}`);
-        await deleteDirectory(curPath);
-      } else {
-        console.log(`Deleting file: ${curPath}`);
-        await fs.unlink(curPath);
-      }
-    }));
-    console.log(`Removing directory: ${directory}`);
-    await fs.rmdir(directory);
+    await Promise.all(
+      files.map(async (file) => {
+        const curPath = path.join(directory, file);
+        const stat = await fs.lstat(curPath);
+        if (stat.isDirectory()) {
+          console.log(
+            `Entering and deleting contents of directory: ${curPath}`
+          );
+          await deleteDirectoryContents(curPath);
+          console.log(`Removing directory: ${curPath}`);
+          await fs.rmdir(curPath);
+        } else {
+          console.log(`Deleting file: ${curPath}`);
+          await fs.unlink(curPath);
+        }
+      })
+    );
   } else {
     console.log(`Directory does not exist, skipping: ${directory}`);
   }
-}
+};
 
-async function setupDirectory() {
+const setupDirectories = async () => {
   try {
-    console.log(`Starting to delete and recreate directory: ${directoryPath}`);
-    await deleteDirectory(directoryPath);
-    console.log(`Directory deleted, now creating: ${directoryPath}`);
-    await fs.mkdir(directoryPath, { recursive: true });
-    console.log(`Directory created: ${directoryPath}`);
+    for (const directory of directories) {
+      console.log(`Starting to clean directory: ${directory}`);
+      await deleteDirectoryContents(directory);
+      console.log(`Contents deleted for directory: ${directory}`);
+    }
   } catch (error) {
     console.error('Error setting up directories:', error);
   }
-}
+};
 
-setupDirectory();
+setupDirectories();

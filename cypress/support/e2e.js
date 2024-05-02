@@ -14,34 +14,36 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
-import './commands'
+import './commands';
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 
 before(() => {
-  cy.log('BEFORE')
+  cy.log('BEFORE');
   cy.fixture('selector.json').then((data) => {
-    Cypress.env('selectorData', data)
-  })
-})
+    Cypress.env('selectorData', data);
+  });
+});
 
-afterEach(function() {
+afterEach(function () {
   if (window.cucumberJson?.generate && this.currentTest.state === 'failed') {
-    const screenshotsEnabled = Cypress.config("screenshotOnRunFailure");
-    const screenshotsFolder = Cypress.config("screenshotsFolder");
+    const screenshotsEnabled = Cypress.config('screenshotOnRunFailure');
+    const screenshotsFolder = Cypress.config('screenshotsFolder');
     const testState = window.testState;
-    const stepResult = testState.runTests[testState.currentScenario.name][testState.currentStep];
+    const stepResult =
+      testState.runTests[testState.currentScenario.name][testState.currentStep];
     const featureName = this.currentTest.parent.title.toLowerCase();
 
     if (screenshotsEnabled) {
-      const absoluteFilePath = this.currentTest.parent.invocationDetails.absoluteFile;
+      const absoluteFilePath =
+        this.currentTest.parent.invocationDetails.absoluteFile;
       const relativeFilePath = absoluteFilePath.split('cucumber/feature/')[1];
       const normalizedPath = relativeFilePath.replace(/\\/g, '/');
       const screenshotFileName = `${featureName} -- ${this.currentTest.title} (failed).png`;
       const filePath = `${screenshotsFolder}/${normalizedPath}/${screenshotFileName}`;
 
-      cy.safeReadFile(filePath, "base64").then((imgData) => {
+      cy.safeReadFile(filePath, 'base64').then((imgData) => {
         if (imgData) {
           cy.log(`Attaching image: ${filePath}`);
           attachScreenshotToReport(imgData, stepResult, testState);
@@ -57,13 +59,13 @@ const attachScreenshotToReport = (imgData, stepResult, testState) => {
   if (imgData && stepResult && testState) {
     stepResult.attachment = {
       data: imgData,
-      media: { type: "image/png" },
+      media: { type: 'image/png' },
       index: testState.currentStep,
-      testCase: testState.formatTestCase(testState.currentScenario),
+      testCase: testState.formatTestCase(testState.currentScenario)
     };
   }
-}
+};
 
 after(() => {
-  cy.log('AFTER')
-})
+  cy.log('AFTER');
+});

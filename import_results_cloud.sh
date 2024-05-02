@@ -14,11 +14,11 @@ log() {
 }
 
 # Start script
-log "Starting script to upload files to Xray."
+log "Starting script to upload JSON files to Xray."
 
-# Check if any files are provided as arguments
-if [ -z "$FILES" ]; then
-    log "Error: No files provided for upload."
+# Directory containing JSON files
+if [ -z "$DIRECTORY" ]; then
+    log "Error: DIRECTORY not set in .env file."
     exit 1
 fi
 
@@ -32,14 +32,13 @@ if [ -z "$token" ]; then
     exit 1
 fi
 
-# Iterate over each file and upload
-for FILE in $FILES; do
-    # Check if the report file exists
-    if [ ! -f "$FILE" ]; then
-        log "Error: File not found - $FILE"
-        continue
-    fi
+# Ensure the directory for the log file exists
+OUTPUT_DIR="cloud-import-results"
+mkdir -p "$OUTPUT_DIR"
+UPLOAD_LOG="$OUTPUT_DIR/upload_log.txt"
 
+# Iterate over each JSON file in the directory and upload
+find "$DIRECTORY" -name '*.json' -print0 | while IFS= read -r -d '' FILE; do
     # Upload the file
     log "Uploading $FILE to Xray..."
     response=$(curl -w "%{http_code}" -o response.txt -H "Content-Type: application/json" -X POST -H "Authorization: Bearer $token" --data @"$FILE" "$BASE_URL/api/v2/import/execution/cucumber")
@@ -50,15 +49,14 @@ for FILE in $FILES; do
         while IFS= read -r line; do
             echo "$line"
         done < "response.txt"
-    else
-        log "Failed to retrieve response details."
     fi
 
-    # Check response status
+    # Check response status and log successfully uploaded files
     if [ "$response" -ne 200 ]; then
         log "Failed to upload file $FILE. HTTP status: $response"
     else
         log "File $FILE uploaded successfully."
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - $FILE" >> "$UPLOAD_LOG"
     fi
 
     # Clean up response file
