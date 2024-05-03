@@ -37,10 +37,10 @@ fi
 echo "Unzipping successful."
 
 echo "Renaming extracted files to remove numbering..."
-# Remove numerical prefixes from the filenames
+# Remove numerical prefixes and unnecessary key-number pairs from the filenames
 cd "$EXPORT_DIR"
 for f in *.feature; do
-    mv "$f" "$(echo $f | sed -E "s/^[0-9]+_($KEY-[0-9]+\.feature)$/\1/")"
+    mv "$f" "$(echo $f | sed -E "s/^[0-9]+_($KEY-[0-9]+).*\.feature$/\1.feature/")"
 done
 cd ..
 
