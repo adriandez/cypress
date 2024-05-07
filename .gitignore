@@ -11,12 +11,15 @@ cypress.env.json
 configurations.json
 
 # Cloud Auth
-cloud_auth.json
+cloud-auth.json
+jira-auth.json
 
 # Cloud Export / Import folders
 cloud-export/
 cloud-import/
 cloud-import-results/
+
+internal/
 
 # Logs
 logs

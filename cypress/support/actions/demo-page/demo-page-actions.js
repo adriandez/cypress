@@ -1,5 +1,5 @@
 import { wrapPageActions } from '../../utilities/action-wrapper.js';
-import { btnSelector } from '../../page-objects/demo-page/demo-page.js';
+import { btnSelector } from '../../page-objects/demo-page/demo-page-objects.js';
 
 const pageActions = {
   navigateToPage: () => {

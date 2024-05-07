@@ -9,7 +9,7 @@
     "clearReports": "node reset-directory.js --reset cypress/reports",
     "pretest": "node reset-directory.js --reset cypress/cucumber-json,cloud-import-results",
     "test": "node runCypressTests.js || exit 0",
-    "posttest": "node generate-report.js && node embeddings-remover.js && node run-script.js ./import_results_cloud.sh",
+    "posttest": "node generate-report.js && node scripts/xray-integration/import-embeddings-remover-results-cloud.js && node scripts/xray-integration/import-prepare-info-result-cloud.js && node scripts/xray-integration/import-multipart-results-cloud.js",
     "lint-fix": "eslint . --fix",
     "lint": "eslint .",
     "format": "prettier --write ."
@@ -21,6 +21,8 @@
     "@cucumber/cucumber-expressions": "latest",
     "@cucumber/gherkin": "latest",
     "@cucumber/tag-expressions": "latest",
+    "archiver": "^7.0.1",
+    "axios": "^1.6.8",
     "core-js": "^3.37.0",
     "cypress": "^13.7.2",
     "cypress-cucumber-preprocessor": "^4.3.1",
@@ -33,6 +35,7 @@
     "multiple-cucumber-html-reporter": "^3.6.2",
     "prettier": "^3.2.5",
     "reflect-metadata": "^0.2.2",
+    "unzipper": "^0.11.4",
     "yargs": "^17.7.2"
   },
   "cypress-cucumber-preprocessor": {

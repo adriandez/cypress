@@ -1,5 +1,5 @@
 import { wrapPageActions } from '../../utilities/action-wrapper.js';
-import { failSelector } from '../../page-objects/fail-page/fail-page.js';
+import { failSelector } from '../../page-objects/fail-page/fail-page-objects.js';
 
 const actions = {
   navigateToPageFail: () => {

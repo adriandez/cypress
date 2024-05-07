@@ -36,7 +36,13 @@ try {
         });
       });
 
-      const outputFile = path.join(outputDir, file);
+      // Create a specific directory for each JSON file within the output directory
+      const fileOutputDir = path.join(outputDir, path.basename(file, '.json'));
+      if (!fs.existsSync(fileOutputDir)) {
+        fs.mkdirSync(fileOutputDir, { recursive: true });
+      }
+
+      const outputFile = path.join(fileOutputDir, file);
       fs.writeFileSync(outputFile, JSON.stringify(fileData, null, 2), 'utf8');
       console.log(`Processed file saved: ${outputFile}`);
     }
