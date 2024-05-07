@@ -9,13 +9,11 @@ import { createFolderAndFile, extractKeyNumFromFileName } from './utilities.js';
  * @param {Map} featureKeyNums - A map containing feature file details keyed by key numbers.
  * @param {string} pageObjectsDir - The directory path for page objects.
  */
-export function handlePageObjects(featureKeyNums, pageObjectsDir) {
+export const handlePageObjects = (featureKeyNums, pageObjectsDir) => {
   featureKeyNums.forEach((featureFileDetails, keyNum) => {
     const featurePath = featureFileDetails.path;
     const featureFileName = featureFileDetails.file;
-    const pageObjectFileName = `${featureFileName
-      .replace(/^[^-]+-\d+-/, '')
-      .replace('.feature', '')}-page-objects.js`;
+    const pageObjectFileName = `${featureFileName.replace(/^[^-]+-\d+-/, '').replace('.feature', '')}-page-objects.js`;
     const pageObjectFilePath = path.join(
       pageObjectsDir,
       path.dirname(featurePath),
@@ -27,11 +25,12 @@ export function handlePageObjects(featureKeyNums, pageObjectsDir) {
         `No matching page-objects.js file found for KEY-NUM: ${keyNum}`
       );
       logger.info(`Creating folder structure and file for KEY-NUM: ${keyNum}`);
-      createFolderAndFile(
-        pageObjectsDir,
-        featureFileDetails,
-        '-page-objects.js',
-        `
+      try {
+        createFolderAndFile(
+          pageObjectsDir,
+          featureFileDetails,
+          '-page-objects.js',
+          `
 /*
 * Page Elements
 **/
@@ -39,11 +38,16 @@ export function handlePageObjects(featureKeyNums, pageObjectsDir) {
 export const nameVariable = 'string';
 
 `,
-        false
-      );
+          false
+        );
+      } catch (error) {
+        logger.error(
+          `Failed to create page objects file for KEY-NUM: ${keyNum}: ${error}`
+        );
+      }
     }
   });
-}
+};
 
 /**
  * Processes a single page object file and matches it with a feature key number.
@@ -55,14 +59,14 @@ export const nameVariable = 'string';
  * @param {Map} keyNums - A map containing key numbers to feature file details.
  * @param {Set} matchedKeyNums - A set of matched key numbers.
  */
-export function handlePageObjectFile(
+export const handlePageObjectFile = (
   file,
   filePath,
   fileRelativePath,
   fileType,
   keyNums,
   matchedKeyNums
-) {
+) => {
   if (file.endsWith(fileType)) {
     logger.info(`Found page object file: ${file}`);
     const keyNum = extractKeyNumFromFileName(file);
@@ -73,4 +77,4 @@ export function handlePageObjectFile(
       logger.warn(`No match found - Path: ${fileRelativePath} - File: ${file}`);
     }
   }
-}
+};

@@ -1,32 +1,36 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import { extractKeyNumFromFileName, createFolderAndFile } from './utilities.js';
 import { logger } from './logger.js';
 
-export function handleActionFiles(
+// Handles processing of all action files in a specified directory
+export const handleActionFiles = async (
   actionsDir,
   featureKeyNums,
   matchedActionsKeyNums
-) {
-  processDirectory(actionsDir, (file, filePath, fileRelativePath) => {
-    handleFileType(
-      file,
-      filePath,
-      fileRelativePath,
-      '-page-actions.js',
-      featureKeyNums,
-      matchedActionsKeyNums,
-      handleActionFile
-    );
-  });
+) => {
+  await processDirectory(
+    actionsDir,
+    async (file, filePath, fileRelativePath) => {
+      await handleFileType(
+        file,
+        filePath,
+        fileRelativePath,
+        '-page-actions.js',
+        featureKeyNums,
+        matchedActionsKeyNums,
+        handleActionFile
+      );
+    }
+  );
 
-  featureKeyNums.forEach((featureFileDetails, keyNum) => {
+  featureKeyNums.forEach(async (featureFileDetails, keyNum) => {
     if (!matchedActionsKeyNums.has(keyNum)) {
       logger.warn(
         `No matching page-actions.js file found for KEY-NUM: ${keyNum}`
       );
       logger.info(`Creating folder structure and file for KEY-NUM: ${keyNum}`);
-      createFolderAndFile(
+      await createFolderAndFile(
         actionsDir,
         featureFileDetails,
         '-page-actions.js',
@@ -46,23 +50,22 @@ const pageActions = {
 const wrappedPageActions = wrapPageActions(pageActions, 'ActionsPage');
 
 export default wrappedPageActions;
-
 `,
         false
       );
     }
   });
-}
+};
 
-// Processes a single action file and matches it with a feature key number.
-function handleActionFile(
+// Handles processing of a single action file and matches it with a feature key number.
+const handleActionFile = async (
   file,
   filePath,
   fileRelativePath,
   fileType,
   keyNums,
   matchedKeyNums
-) {
+) => {
   if (file.endsWith(fileType)) {
     logger.info(`Found action file: ${file}`);
     const keyNum = extractKeyNumFromFileName(file);
@@ -73,10 +76,10 @@ function handleActionFile(
       logger.warn(`No match found - Path: ${fileRelativePath} - File: ${file}`);
     }
   }
-}
+};
 
 // Generic function to handle different file types using specific file handlers.
-export function handleFileType(
+export const handleFileType = async (
   file,
   filePath,
   fileRelativePath,
@@ -84,8 +87,8 @@ export function handleFileType(
   keyNums,
   matchedKeyNums,
   fileHandler
-) {
-  fileHandler(
+) => {
+  await fileHandler(
     file,
     filePath,
     fileRelativePath,
@@ -93,28 +96,30 @@ export function handleFileType(
     keyNums,
     matchedKeyNums
   );
-}
+};
 
 // Processes all files in the given directory and applies a handler function to each.
-function processDirectory(dir, fileHandler, relativePath = '') {
+const processDirectory = async (dir, fileHandler, relativePath = '') => {
   try {
     logger.info(`Processing directory: ${dir}`);
-    const files = fs.readdirSync(dir);
+    const files = await fs.readdir(dir);
     logger.debug(`Found files: ${files}`);
 
-    files.forEach((file) => {
-      const filePath = path.join(dir, file);
-      const fileRelativePath = path.join(relativePath, file);
-      const stat = fs.statSync(filePath);
+    await Promise.all(
+      files.map(async (file) => {
+        const filePath = path.join(dir, file);
+        const fileRelativePath = path.join(relativePath, file);
+        const stat = await fs.stat(filePath);
 
-      if (stat.isDirectory()) {
-        logger.info(`Entering directory: ${filePath}`);
-        processDirectory(filePath, fileHandler, fileRelativePath);
-      } else {
-        fileHandler(file, filePath, fileRelativePath);
-      }
-    });
+        if (stat.isDirectory()) {
+          logger.info(`Entering directory: ${filePath}`);
+          await processDirectory(filePath, fileHandler, fileRelativePath);
+        } else {
+          await fileHandler(file, filePath, fileRelativePath);
+        }
+      })
+    );
   } catch (error) {
     logger.error(`Error processing directory: ${dir}. Error: ${error}`);
   }
-}
+};

@@ -7,8 +7,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const logsDir = path.join(__dirname, 'logs');
-if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir, { recursive: true });
+try {
+  if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir, { recursive: true });
+  }
+} catch (error) {
+  console.error('Failed to create log directory:', error);
 }
 
 const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -25,7 +29,11 @@ export const logger = {
       console.log(`${color}${formattedMessage}\x1b[0m`);
 
       // File output
-      fs.appendFileSync(logFile, formattedMessage + '\n', 'utf8');
+      try {
+        fs.appendFileSync(logFile, formattedMessage + '\n', 'utf8');
+      } catch (error) {
+        console.error('Error writing to log file:', error);
+      }
     });
   },
   info: (message) => logger.log('INFO', message),

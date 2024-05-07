@@ -3,19 +3,23 @@ import path from 'path';
 import dotenv from 'dotenv';
 import { logger } from './logger.js';
 
+// Load environment settings
 dotenv.config();
 
+// Define base directories for Cypress tests and supporting files
 const baseDir = 'cypress/e2e/cucumber';
 const featureDir = path.join(baseDir, 'feature');
 const stepDefDir = path.join(baseDir, 'step-definitions');
 const actionsDir = 'cypress/support/actions';
 const pageObjectsDir = path.join('cypress/support/page-objects');
 
+// Log the initial setup information for directories
 logger.info(`Starting script. Feature directory: ${featureDir}`);
 logger.info(`Step definitions directory: ${stepDefDir}`);
 logger.info(`Actions directory: ${actionsDir}`);
 logger.info(`Page Objects directory: ${pageObjectsDir}`);
 
+// Extracts a key number from a filename typically formatted with a key at the start
 export const extractKeyNumFromFileName = (fileName) => {
   try {
     const match = fileName.match(/^([^-]+-\d+)/);
@@ -32,6 +36,7 @@ export const extractKeyNumFromFileName = (fileName) => {
   }
 };
 
+// Process directories recursively, applying a handler function to each file
 export const processDirectory = (dir, fileHandler, relativePath = '') => {
   try {
     logger.info(`Processing directory: ${dir}`);
@@ -55,6 +60,7 @@ export const processDirectory = (dir, fileHandler, relativePath = '') => {
   }
 };
 
+// Create folders and files for features, handling templates for standard file content
 export const createFolderAndFile = (
   baseDir,
   featureFileDetails,

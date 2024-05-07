@@ -26,6 +26,7 @@ const getJiraIssue = async () => {
 
     const response = await axios.get(url, { headers });
     console.log(response.data);
+    console.log(response.data.fields.labels);
     //console.log(response.data.fields.issuelinks);
     //console.log(response.data.fields.issuelinks[0].type); // Output the issue details
   } catch (error) {

@@ -3,16 +3,17 @@ import { logger } from './logger.js';
 
 /**
  * Handles the creation of step definition files if they do not exist.
+ * Iterates through feature files and creates corresponding step definition files if they are not already matched.
  *
  * @param {Map} featureKeyNums - A map containing feature file details keyed by key numbers.
  * @param {Set} matchedStepDefKeyNums - A set containing matched key numbers for step definitions.
  * @param {string} stepDefDir - The directory path for step definitions.
  */
-export function handleStepDefinitions(
+export const handleStepDefinitions = (
   featureKeyNums,
   matchedStepDefKeyNums,
   stepDefDir
-) {
+) => {
   featureKeyNums.forEach((featureFileDetails, keyNum) => {
     if (!matchedStepDefKeyNums.has(keyNum)) {
       logger.warn(`No matching step-def.js file found for KEY-NUM: ${keyNum}`);
@@ -35,10 +36,11 @@ Then('template', () => {});
       );
     }
   });
-}
+};
 
 /**
- * Processes a single step definition file and matches it with a feature key number.
+ * Processes a single step definition file and checks if it corresponds to any known feature key numbers.
+ * Logs information about each step definition file processed.
  *
  * @param {string} file - The name of the file.
  * @param {string} filePath - The path of the file.
@@ -47,14 +49,14 @@ Then('template', () => {});
  * @param {Map} keyNums - A map containing key numbers to feature file details.
  * @param {Set} matchedKeyNums - A set of matched key numbers.
  */
-export function handleStepDefFile(
+export const handleStepDefFile = (
   file,
   filePath,
   fileRelativePath,
   fileType,
   keyNums,
   matchedKeyNums
-) {
+) => {
   if (file.endsWith(fileType)) {
     logger.info(`Found step definition file: ${file}`);
     const keyNum = extractKeyNumFromFileName(file);
@@ -65,4 +67,4 @@ export function handleStepDefFile(
       logger.warn(`No match found - Path: ${fileRelativePath} - File: ${file}`);
     }
   }
-}
+};

@@ -74,6 +74,7 @@ const main = async () => {
 
       if (match) {
         const newFileName = `${match[1]}.feature`;
+        console.log(`Renaming ${file} to ${newFileName}`);
         fs.renameSync(
           path.join(EXPORT_DIR, file),
           path.join(EXPORT_DIR, newFileName)
