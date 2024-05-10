@@ -1,4 +1,6 @@
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
 import dotenv from 'dotenv';
 import { logger } from './logger.js';
 import { processDirectory } from './utilities.js';
@@ -12,21 +14,51 @@ import {
 
 dotenv.config();
 
+// Setting up __dirname for ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Logging initial environment and configurations
+logger.debug('Environment variables loaded:', JSON.stringify(process.env));
+
 const baseDir = 'cypress/e2e/cucumber';
 const featureDir = path.join(baseDir, 'feature');
 const stepDefDir = path.join(baseDir, 'step-definitions');
 const actionsDir = 'cypress/support/actions';
 const pageObjectsDir = path.join('cypress/support/page-objects');
 
-logger.info(`Starting script. Feature directory: ${featureDir}`);
-logger.info(`Step definitions directory: ${stepDefDir}`);
-logger.info(`Actions directory: ${actionsDir}`);
-logger.info(`Page Objects directory: ${pageObjectsDir}`);
+// Log the initial paths set up for the script
+logger.info(`Initial setup: Base directory set to ${baseDir}`);
+logger.info(`Feature directory set to ${featureDir}`);
+logger.info(`Step definitions directory set to ${stepDefDir}`);
+logger.info(`Actions directory set to ${actionsDir}`);
+logger.info(`Page Objects directory set to ${pageObjectsDir}`);
+
+// Execute external scripts synchronously
+const scripts = [
+  '../jira-integration/export-rename-feature-files.js',
+  '../jira-integration/jira-feature-organizer.js'
+];
+
+scripts.forEach((script) => {
+  try {
+    const scriptPath = path.join(__dirname, script);
+    logger.info(`Executing ${scriptPath}`);
+    execSync(`node ${scriptPath}`, { stdio: 'inherit' });
+    logger.info(`${scriptPath} script executed successfully.`);
+  } catch (error) {
+    logger.error(
+      `Failed to execute ${scriptPath} script. Error: ${error.message}`
+    );
+    process.exit(1); // Optionally exit if the script cannot be executed
+  }
+});
 
 // Process feature files
 const featureKeyNums = new Map();
 processDirectory(featureDir, (file, filePath, fileRelativePath) => {
   handleFeatureFile(file, filePath, fileRelativePath, featureKeyNums);
+  logger.debug(`Processing feature file: ${file} at ${filePath}`);
 });
 
 // Process step definitions
@@ -41,6 +73,7 @@ processDirectory(stepDefDir, (file, filePath, fileRelativePath) => {
     matchedStepDefKeyNums,
     handleStepDefFile
   );
+  logger.debug(`Processing step definition file: ${file} at ${filePath}`);
 });
 
 handleStepDefinitions(featureKeyNums, matchedStepDefKeyNums, stepDefDir);
@@ -60,8 +93,9 @@ processDirectory(pageObjectsDir, (file, filePath, fileRelativePath) => {
     featureKeyNums,
     matchedPageObjectsKeyNums
   );
+  logger.debug(`Processing page object file: ${file} at ${filePath}`);
 });
 
 handlePageObjects(featureKeyNums, pageObjectsDir);
 
-logger.info('Script execution completed.');
+logger.info('Script execution completed. All directories and files processed.');

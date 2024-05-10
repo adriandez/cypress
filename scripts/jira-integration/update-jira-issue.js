@@ -44,4 +44,4 @@ const updateJiraIssueLabels = async (newLabels) => {
 };
 
 // Example usage: updateJiraIssueLabels(['new_label1', 'new_label2']);
-updateJiraIssueLabels(['L1_Dir_user-authentication', 'L2_Dir_category-1']); // Replace with actual labels you want to add
+updateJiraIssueLabels(['L1_Dir_l1', 'L2_Dir_l2']); // Replace with actual labels you want to add
