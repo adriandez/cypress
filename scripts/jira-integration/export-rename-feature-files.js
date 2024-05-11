@@ -3,10 +3,13 @@ import axios from 'axios';
 import fs from 'fs/promises';
 import { Buffer } from 'buffer';
 import path from 'path';
+import { logger } from '../logger.js';
 
 dotenv.config();
 
 const EXPORT_DIR = process.env.EXPORT_DIR || 'cloud-export';
+
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const getJiraIssueSummary = async (issueKey) => {
   try {
@@ -23,9 +26,8 @@ const getJiraIssueSummary = async (issueKey) => {
     const response = await axios.get(url, { headers });
     return response.data.fields.summary;
   } catch (error) {
-    console.error(
-      `Error fetching Jira issue for key ${issueKey}:`,
-      error.message
+    logger.error(
+      `Error fetching Jira issue for key ${issueKey}: ${error.message}`
     );
     return null; // Return null if there is an error
   }
@@ -47,12 +49,12 @@ const renameFeatureFiles = async () => {
           path.join(EXPORT_DIR, file),
           path.join(EXPORT_DIR, newFilename)
         );
-        console.log(`Renamed ${file} to ${newFilename}`);
+        logger.info(`Renamed ${file} to ${newFilename}`);
       }
     }
   } catch (error) {
-    console.error('Error processing feature files:', error.message);
+    logger.error(`Error processing feature files: ${error.message}`);
   }
 };
 
-renameFeatureFiles();
+export { renameFeatureFiles };

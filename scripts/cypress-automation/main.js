@@ -1,8 +1,7 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { execSync } from 'child_process';
 import dotenv from 'dotenv';
-import { logger } from './logger.js';
+import { logger } from '../logger.js';
 import { processDirectory } from './utilities.js';
 import { handleFeatureFile } from './featureHandler.js';
 import { handleStepDefinitions, handleStepDefFile } from './stepDefHandler.js';
@@ -11,6 +10,8 @@ import {
   handlePageObjects,
   handlePageObjectFile
 } from './pageObjectHandler.js';
+import { organizeFeatures } from '../jira-integration/jira-feature-organizer.js';
+import { renameFeatureFiles } from '../jira-integration/export-rename-feature-files.js';
 
 dotenv.config();
 
@@ -34,68 +35,73 @@ logger.info(`Step definitions directory set to ${stepDefDir}`);
 logger.info(`Actions directory set to ${actionsDir}`);
 logger.info(`Page Objects directory set to ${pageObjectsDir}`);
 
-// Execute external scripts synchronously
-const scripts = [
-  '../jira-integration/export-rename-feature-files.js',
-  '../jira-integration/jira-feature-organizer.js'
-];
-
-scripts.forEach((script) => {
+// Main async function to control flow
+const main = async () => {
   try {
-    const scriptPath = path.join(__dirname, script);
-    logger.info(`Executing ${scriptPath}`);
-    execSync(`node ${scriptPath}`, { stdio: 'inherit' });
-    logger.info(`${scriptPath} script executed successfully.`);
-  } catch (error) {
-    logger.error(
-      `Failed to execute ${scriptPath} script. Error: ${error.message}`
+    // Execute async operations
+    logger.info('Renaming feature files');
+    await renameFeatureFiles(); // Ensure this completes before proceeding
+    logger.info('Feature files renamed successfully.');
+
+    // Proceed with the rest of the operations after renaming feature files
+    logger.info('Starting JIRA feature organization');
+    await organizeFeatures();
+    logger.info('JIRA feature organization completed successfully.');
+
+    // Process feature files
+    const featureKeyNums = new Map();
+    await processDirectory(featureDir, (file, filePath, fileRelativePath) => {
+      handleFeatureFile(file, filePath, fileRelativePath, featureKeyNums);
+      logger.debug(`Processing feature file: ${file} at ${filePath}`);
+    });
+
+    // Process step definitions
+    const matchedStepDefKeyNums = new Set();
+    await processDirectory(stepDefDir, (file, filePath, fileRelativePath) => {
+      handleFileType(
+        file,
+        filePath,
+        fileRelativePath,
+        '-step-def.js',
+        featureKeyNums,
+        matchedStepDefKeyNums,
+        handleStepDefFile
+      );
+      logger.debug(`Processing step definition file: ${file} at ${filePath}`);
+    });
+
+    handleStepDefinitions(featureKeyNums, matchedStepDefKeyNums, stepDefDir);
+
+    // Process actions
+    const matchedActionsKeyNums = new Set();
+    handleActionFiles(actionsDir, featureKeyNums, matchedActionsKeyNums);
+
+    // Process page objects
+    const matchedPageObjectsKeyNums = new Set();
+    await processDirectory(
+      pageObjectsDir,
+      (file, filePath, fileRelativePath) => {
+        handlePageObjectFile(
+          file,
+          filePath,
+          fileRelativePath,
+          '-page-objects.js',
+          featureKeyNums,
+          matchedPageObjectsKeyNums
+        );
+        logger.debug(`Processing page object file: ${file} at ${filePath}`);
+      }
     );
-    process.exit(1); // Optionally exit if the script cannot be executed
+
+    handlePageObjects(featureKeyNums, pageObjectsDir);
+
+    logger.info(
+      'Script execution completed. All directories and files processed.'
+    );
+  } catch (error) {
+    logger.error(`An error occurred: ${error.message}`);
+    process.exit(1);
   }
-});
+};
 
-// Process feature files
-const featureKeyNums = new Map();
-processDirectory(featureDir, (file, filePath, fileRelativePath) => {
-  handleFeatureFile(file, filePath, fileRelativePath, featureKeyNums);
-  logger.debug(`Processing feature file: ${file} at ${filePath}`);
-});
-
-// Process step definitions
-const matchedStepDefKeyNums = new Set();
-processDirectory(stepDefDir, (file, filePath, fileRelativePath) => {
-  handleFileType(
-    file,
-    filePath,
-    fileRelativePath,
-    '-step-def.js',
-    featureKeyNums,
-    matchedStepDefKeyNums,
-    handleStepDefFile
-  );
-  logger.debug(`Processing step definition file: ${file} at ${filePath}`);
-});
-
-handleStepDefinitions(featureKeyNums, matchedStepDefKeyNums, stepDefDir);
-
-// Process actions
-const matchedActionsKeyNums = new Set();
-handleActionFiles(actionsDir, featureKeyNums, matchedActionsKeyNums);
-
-// Process page objects
-const matchedPageObjectsKeyNums = new Set();
-processDirectory(pageObjectsDir, (file, filePath, fileRelativePath) => {
-  handlePageObjectFile(
-    file,
-    filePath,
-    fileRelativePath,
-    '-page-objects.js',
-    featureKeyNums,
-    matchedPageObjectsKeyNums
-  );
-  logger.debug(`Processing page object file: ${file} at ${filePath}`);
-});
-
-handlePageObjects(featureKeyNums, pageObjectsDir);
-
-logger.info('Script execution completed. All directories and files processed.');
+main();

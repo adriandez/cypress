@@ -2,14 +2,18 @@ import fs from 'fs/promises';
 import path from 'path';
 import axios from 'axios';
 import dotenv from 'dotenv';
+import { logger } from '../logger.js';
 
 dotenv.config();
+
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const createDirIfNotExist = async (dir) => {
   try {
     await fs.access(dir);
   } catch {
     await fs.mkdir(dir, { recursive: true });
+    logger.debug(`Directory created: ${dir}`);
   }
 };
 
@@ -25,9 +29,10 @@ const getJiraLabels = async (issueKey) => {
       Accept: 'application/json'
     };
     const response = await axios.get(url, { headers });
+    logger.info(`Labels fetched for issue ${issueKey}`);
     return response.data.fields.labels;
   } catch (error) {
-    console.error('Error fetching Jira issue:', error.message);
+    logger.error(`Error fetching Jira issue ${issueKey}: ${error.message}`);
     throw new Error('Failed to fetch Jira labels');
   }
 };
@@ -43,6 +48,7 @@ const getFeatureFiles = async (dirPath) => {
       filesToReturn.push(filePath);
     }
   }
+  logger.debug(`Files listed from directory: ${dirPath}`);
   return filesToReturn;
 };
 
@@ -69,13 +75,13 @@ const processFeatureFiles = async () => {
     try {
       if (targetFilePath) {
         if (await fs.stat(targetFilePath)) {
-          console.log(`Match: Updating ${fileName} at ${targetFilePath}`);
+          logger.info(`Match: Updating ${fileName} at ${targetFilePath}`);
           await fs.rm(targetFilePath);
           await fs.rename(file, targetFilePath);
           processedCount++;
         }
       } else {
-        console.log(`No match: Moving ${fileName}`);
+        logger.info(`No match: Moving ${fileName}`);
         const labels = await getJiraLabels(keyNum);
         const L1Dirs = labels
           .filter((label) => label.startsWith('L1_Dir_'))
@@ -93,23 +99,23 @@ const processFeatureFiles = async () => {
             await createDirIfNotExist(L2Path);
             const newPath = path.join(L2Path, fileName);
             if (await fs.stat(newPath).catch(() => false)) {
-              console.log(
-                `Warning: File already exists and will not be overwritten: ${newPath}`
+              logger.warn(
+                `File already exists and will not be overwritten: ${newPath}`
               );
             } else {
               await fs.rename(file, newPath);
-              console.log(`Moved ${fileName} to ${L2Path}`);
+              logger.info(`Moved ${fileName} to ${L2Path}`);
               processedCount++;
             }
           }
         }
       }
     } catch (error) {
-      console.error(`Error processing ${fileName}: ${error.message}`);
+      logger.error(`Error processing ${fileName}: ${error.message}`);
     }
   }
 
-  console.log(`Total files processed: ${processedCount}`);
+  logger.info(`Total files processed: ${processedCount}`);
 };
 
-processFeatureFiles().catch(console.error);
+export const organizeFeatures = processFeatureFiles;

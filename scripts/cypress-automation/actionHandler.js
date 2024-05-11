@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { extractKeyNumFromFileName, createFolderAndFile } from './utilities.js';
-import { logger } from './logger.js';
+import { logger } from '../logger.js';
 
 // Handles processing of all action files in a specified directory
 export const handleActionFiles = async (

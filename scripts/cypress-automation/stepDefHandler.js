@@ -1,5 +1,5 @@
 import { createFolderAndFile, extractKeyNumFromFileName } from './utilities.js';
-import { logger } from './logger.js';
+import { logger } from '../logger.js';
 
 /**
  * Handles the creation of step definition files if they do not exist.
@@ -51,7 +51,6 @@ Then('template', () => {});
  */
 export const handleStepDefFile = (
   file,
-  filePath,
   fileRelativePath,
   fileType,
   keyNums,

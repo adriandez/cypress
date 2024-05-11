@@ -1,8 +1,5 @@
-// Importing the utility function to extract key numbers from file names.
 import { extractKeyNumFromFileName } from './utilities.js';
-
-// Importing the logger module for logging messages.
-import { logger } from './logger.js';
+import { logger } from '../logger.js';
 
 /**
  * Handles processing of a single feature file by checking its extension,
@@ -19,25 +16,32 @@ export const handleFeatureFile = (
   fileRelativePath,
   keyNums
 ) => {
+  if (!file) {
+    logger.error('No file name provided.');
+    return;
+  }
+
   // Check if the file extension is '.feature'.
   if (file.endsWith('.feature')) {
-    // Log the discovery of a feature file.
-    logger.info(`Found feature file: ${file}`);
-
-    // Extract the key number from the file name.
-    const keyNum = extractKeyNumFromFileName(file);
-
-    if (keyNum) {
-      // If a key number is successfully extracted, store it in the Map along with file details.
-      keyNums.set(keyNum, { file, path: fileRelativePath });
-
-      // Log detailed information about the file and the extracted key number.
-      logger.debug(
-        `File: ${file} - Path: ${fileRelativePath} - KEY-NUM: ${keyNum}`
+    logger.info(`Found feature file: ${file} - file path: ${filePath}`);
+    try {
+      const keyNum = extractKeyNumFromFileName(file);
+      if (keyNum) {
+        keyNums.set(keyNum, { file, path: fileRelativePath });
+        logger.debug(
+          `File: ${file} - Path: ${fileRelativePath} - KEY-NUM: ${keyNum}`
+        );
+      } else {
+        logger.warn(
+          `No key number found in file name: ${file}. Ensure the file is correctly named.`
+        );
+      }
+    } catch (error) {
+      logger.error(
+        `Error extracting key number from file: ${file}. Error: ${error.message}`
       );
-    } else {
-      // Log a warning if no key number could be extracted from the file name.
-      logger.warn(`Could not extract key number from file: ${file}`);
     }
+  } else {
+    logger.warn(`Skipped non-feature file: ${file}`);
   }
 };

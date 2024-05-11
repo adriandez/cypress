@@ -17,6 +17,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@babel/plugin-transform-class-properties": "^7.18.6",
+    "@babel/plugin-transform-object-rest-spread": "^7.20.7",
     "@cucumber/cucumber": "latest",
     "@cucumber/cucumber-expressions": "latest",
     "@cucumber/gherkin": "latest",
