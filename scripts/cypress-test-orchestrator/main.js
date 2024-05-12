@@ -19,9 +19,6 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Logging initial environment and configurations
-logger.debug('Environment variables loaded:', JSON.stringify(process.env));
-
 const baseDir = 'cypress/e2e/cucumber';
 const featureDir = path.join(baseDir, 'feature');
 const stepDefDir = path.join(baseDir, 'step-definitions');
@@ -39,20 +36,22 @@ logger.info(`Page Objects directory set to ${pageObjectsDir}`);
 const main = async () => {
   try {
     // Execute async operations
-    logger.info('Renaming feature files');
+    logger.attempting('Renaming feature files');
     await renameFeatureFiles(); // Ensure this completes before proceeding
-    logger.info('Feature files renamed successfully.');
+    logger.success('Feature files renamed successfully.');
 
     // Proceed with the rest of the operations after renaming feature files
-    logger.info('Starting JIRA feature organization');
+    logger.attempting('JIRA feature organization');
     await organizeFeatures();
-    logger.info('JIRA feature organization completed successfully.');
+    logger.success('JIRA feature organization completed successfully.');
 
     // Process feature files
     const featureKeyNums = new Map();
     await processDirectory(featureDir, (file, filePath, fileRelativePath) => {
+      logger.attempting('Process feature files');
       handleFeatureFile(file, filePath, fileRelativePath, featureKeyNums);
-      logger.debug(`Processing feature file: ${file} at ${filePath}`);
+      logger.info(`Processing feature file: ${file} at ${filePath}`);
+      logger.success('Process feature files completed successfully.');
     });
 
     // Process step definitions
@@ -67,14 +66,18 @@ const main = async () => {
         matchedStepDefKeyNums,
         handleStepDefFile
       );
-      logger.debug(`Processing step definition file: ${file} at ${filePath}`);
+      logger.info(`Processing step definition file: ${file} at ${filePath}`);
     });
 
+    logger.attempting('Process step definitions files');
     handleStepDefinitions(featureKeyNums, matchedStepDefKeyNums, stepDefDir);
+    logger.success('Process step definitions files completed successfully.');
 
     // Process actions
     const matchedActionsKeyNums = new Set();
+    logger.attempting('Process actions files');
     handleActionFiles(actionsDir, featureKeyNums, matchedActionsKeyNums);
+    logger.success('Process actions files completed successfully.');
 
     // Process page objects
     const matchedPageObjectsKeyNums = new Set();
@@ -89,15 +92,12 @@ const main = async () => {
           featureKeyNums,
           matchedPageObjectsKeyNums
         );
-        logger.debug(`Processing page object file: ${file} at ${filePath}`);
+        logger.info(`Processing page object file: ${file} at ${filePath}`);
       }
     );
-
+    logger.attempting('Process page objects files');
     handlePageObjects(featureKeyNums, pageObjectsDir);
-
-    logger.info(
-      'Script execution completed. All directories and files processed.'
-    );
+    logger.success('Process page objects files completed successfully.');
   } catch (error) {
     logger.error(`An error occurred: ${error.message}`);
     process.exit(1);

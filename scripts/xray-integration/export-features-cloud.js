@@ -3,22 +3,25 @@ import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
 import unzipper from 'unzipper';
+import { logger } from '../logger.js'; // Import the custom logger
 
 dotenv.config();
 
 const { EXPORT_DIR, BASE_URL, KEYS, KEY } = process.env;
 
 if (!EXPORT_DIR || !BASE_URL || !KEYS || !KEY) {
-  console.error('Error: Missing required environment variables.');
+  logger.error('Error: Missing required environment variables.');
   process.exit(1);
 }
 
 fs.mkdirSync(EXPORT_DIR, { recursive: true });
 
 const authenticate = async () => {
+  logger.info('authenticate: preparing authData');
   const authData = JSON.parse(
     fs.readFileSync('./scripts/xray-integration/cloud-auth.json', 'utf8')
   );
+  logger.info(`${BASE_URL}/api/v2/authenticate`);
   const authResponse = await axios.post(
     `${BASE_URL}/api/v2/authenticate`,
     authData,
@@ -30,6 +33,8 @@ const authenticate = async () => {
 };
 
 const downloadFeatures = async (token) => {
+  logger.info('downloadFeatures');
+  logger.info(`${BASE_URL}/api/v2/export/cucumber?keys=${KEYS}`);
   const response = await axios.get(
     `${BASE_URL}/api/v2/export/cucumber?keys=${KEYS}`,
     {
@@ -50,6 +55,8 @@ const downloadFeatures = async (token) => {
 };
 
 const unzipFiles = async (zipFilePath) => {
+  logger.info('unzipFiles');
+  logger.info(zipFilePath);
   await fs
     .createReadStream(zipFilePath)
     .pipe(unzipper.Extract({ path: EXPORT_DIR }))
@@ -65,33 +72,35 @@ const renameFiles = () => {
     const match = file.match(regex);
     if (match) {
       const newFileName = `${match[1]}.feature`;
-      console.log(`Renaming ${file} to ${newFileName}`);
+      logger.info(`Renaming ${file} to ${newFileName}`);
       fs.renameSync(
         path.join(EXPORT_DIR, file),
         path.join(EXPORT_DIR, newFileName)
       );
     } else {
-      console.error(`Failed to extract key number from ${file}`);
+      logger.error(`Failed to extract key number from ${file}`);
     }
   });
 };
 
 const main = async () => {
   try {
-    console.log('Authenticating with Xray API...');
+    logger.start('export-rename-feature-files script');
+    logger.attempting('Authenticating with Xray API...');
     const token = await authenticate();
-    console.log('Authentication successful. Token received.');
-    console.log('Downloading feature files...');
+    logger.success('Authentication successful. Token received.');
+    logger.attempting('Downloading feature files...');
     const zipFilePath = await downloadFeatures(token);
-    console.log('Download successful.');
-    console.log('Unzipping feature files...');
+    logger.success('Download successful.');
+    logger.attempting('Unzipping feature files...');
     await unzipFiles(zipFilePath);
-    console.log('Unzipping successful.');
-    console.log('Renaming extracted files to remove numbering...');
+    logger.success('Unzipping successful.');
+    logger.attempting('Renaming extracted files to remove numbering...');
     renameFiles();
-    console.log('File renaming complete.');
+    logger.success('File renaming complete.');
+    logger.end('export-rename-feature-files script');
   } catch (error) {
-    console.error('An error occurred:', error.message);
+    logger.error(`An error occurred: ${error.message}`);
     process.exit(1);
   }
 };

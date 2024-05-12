@@ -28,7 +28,7 @@ export const handleFeatureFile = (
       const keyNum = extractKeyNumFromFileName(file);
       if (keyNum) {
         keyNums.set(keyNum, { file, path: fileRelativePath });
-        logger.debug(
+        logger.info(
           `File: ${file} - Path: ${fileRelativePath} - KEY-NUM: ${keyNum}`
         );
       } else {

@@ -56,7 +56,7 @@ export const logger = {
   getColor: (level) => {
     switch (level) {
       case 'INFO':
-        return '\x1b[32m'; // green
+        return '\x1b[0m';
       case 'WARN':
         return '\x1b[33m'; // yellow
       case 'ERROR':
@@ -64,11 +64,11 @@ export const logger = {
       case 'DEBUG':
         return '\x1b[34m'; // blue
       case 'START':
-        return '\x1b[36m'; // cyan
+        return '\x1b[35m'; // magenta
       case 'END':
         return '\x1b[35m'; // magenta
       case 'ATTEMPT':
-        return '\x1b[33m'; // bold yellow
+        return '\x1b[36m'; // cyan
       case 'SUCCESS':
         return '\x1b[32m'; // bold green
       default:

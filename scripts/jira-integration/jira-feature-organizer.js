@@ -13,7 +13,7 @@ const createDirIfNotExist = async (dir) => {
     await fs.access(dir);
   } catch {
     await fs.mkdir(dir, { recursive: true });
-    logger.debug(`Directory created: ${dir}`);
+    logger.info(`Directory created: ${dir}`);
   }
 };
 
@@ -48,7 +48,7 @@ const getFeatureFiles = async (dirPath) => {
       filesToReturn.push(filePath);
     }
   }
-  logger.debug(`Files listed from directory: ${dirPath}`);
+  logger.info(`Files listed from directory: ${dirPath}`);
   return filesToReturn;
 };
 

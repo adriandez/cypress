@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import dotenv from 'dotenv';
 import { logger } from '../logger.js';
@@ -24,9 +24,7 @@ export const extractKeyNumFromFileName = (fileName) => {
   try {
     const match = fileName.match(/^([^-]+-\d+)/);
     const keyNum = match ? match[1] : 'None';
-    logger.debug(
-      `Extracting key from file name: ${fileName}. Found: ${keyNum}`
-    );
+    logger.info(`Extracting key from file name: ${fileName}. Found: ${keyNum}`);
     return keyNum !== 'None' ? keyNum : null;
   } catch (error) {
     logger.error(
@@ -36,32 +34,32 @@ export const extractKeyNumFromFileName = (fileName) => {
   }
 };
 
-// Process directories recursively, applying a handler function to each file
-export const processDirectory = (dir, fileHandler, relativePath = '') => {
+// Process directories recursively, applying an async handler function to each file
+export const processDirectory = async (dir, fileHandler, relativePath = '') => {
   try {
     logger.info(`Processing directory: ${dir}`);
-    const files = fs.readdirSync(dir);
-    logger.debug(`Found files: ${files}`);
+    const files = await fs.readdir(dir);
+    logger.info(`Found files: ${files}`);
 
-    files.forEach((file) => {
+    for (const file of files) {
       const filePath = path.join(dir, file);
       const fileRelativePath = path.join(relativePath, file);
-      const stat = fs.statSync(filePath);
+      const stat = await fs.stat(filePath);
 
       if (stat.isDirectory()) {
         logger.info(`Entering directory: ${filePath}`);
-        processDirectory(filePath, fileHandler, fileRelativePath);
+        await processDirectory(filePath, fileHandler, fileRelativePath); // Ensure recursive calls are awaited
       } else {
-        fileHandler(file, filePath, fileRelativePath);
+        await fileHandler(file, filePath, fileRelativePath); // Await handler to complete processing each file
       }
-    });
+    }
   } catch (error) {
     logger.error(`Error processing directory: ${dir}. Error: ${error}`);
   }
 };
 
 // Create folders and files for features, handling templates for standard file content
-export const createFolderAndFile = (
+export const createFolderAndFile = async (
   baseDir,
   featureFileDetails,
   fileType,
@@ -81,18 +79,18 @@ export const createFolderAndFile = (
           featureFileName.replace('.feature', '')
         )
       : path.join(baseDir, featureFolderPath);
-    logger.debug(`New folder path: ${newFolderPath}`);
+    logger.info(`New folder path: ${newFolderPath}`);
 
-    fs.mkdirSync(newFolderPath, { recursive: true });
+    await fs.mkdir(newFolderPath, { recursive: true });
     logger.info(`Created directories up to: ${newFolderPath}`);
 
     const newFileName = featureFileName
       .replace(/^[^-]+-\d+-/, '')
       .replace('.feature', fileType);
     const newFilePath = path.join(newFolderPath, newFileName);
-    logger.debug(`New file path: ${newFilePath}`);
+    logger.info(`New file path: ${newFilePath}`);
 
-    fs.writeFileSync(newFilePath, templateCode);
+    await fs.writeFile(newFilePath, templateCode);
     logger.info(`Created file: ${newFilePath} with template code`);
   } catch (error) {
     logger.error(
@@ -100,3 +98,21 @@ export const createFolderAndFile = (
     );
   }
 };
+
+// Main function to run the script
+const main = async () => {
+  try {
+    // Simulate processing of directories and file operations
+    await processDirectory(featureDir, async (file, filePath) => {
+      // Placeholder for what might happen in fileHandler
+      logger.info(`Handling file: ${file} at ${filePath}`);
+    });
+  } catch (error) {
+    logger.error(
+      `An error occurred during ${featureDir} execution: ${error.message}`
+    );
+    process.exit(1);
+  }
+};
+
+main();

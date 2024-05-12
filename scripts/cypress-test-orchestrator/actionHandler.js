@@ -103,7 +103,7 @@ const processDirectory = async (dir, fileHandler, relativePath = '') => {
   try {
     logger.info(`Processing directory: ${dir}`);
     const files = await fs.readdir(dir);
-    logger.debug(`Found files: ${files}`);
+    logger.info(`Found files: ${files}`);
 
     await Promise.all(
       files.map(async (file) => {
