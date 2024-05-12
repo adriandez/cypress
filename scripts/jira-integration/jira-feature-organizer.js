@@ -55,7 +55,7 @@ const getFeatureFiles = async (dirPath) => {
 const processFeatureFiles = async () => {
   const exportDir = path.join(
     process.cwd(),
-    process.env.EXPORT_DIR || 'cloud-export'
+    process.env.EXPORT_DIR || 'cypress/cloud-export'
   );
   const targetDir = path.join(
     process.cwd(),

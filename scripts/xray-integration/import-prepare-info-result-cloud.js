@@ -88,4 +88,4 @@ const processFile = (filePath, fileName) => {
   });
 };
 
-readDirectories('cloud-import-results', processFile);
+readDirectories('cypress/cloud-import-results', processFile);

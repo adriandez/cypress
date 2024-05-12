@@ -7,7 +7,7 @@ import { logger } from '../logger.js';
 
 dotenv.config();
 
-const EXPORT_DIR = process.env.EXPORT_DIR || 'cloud-export';
+const EXPORT_DIR = process.env.EXPORT_DIR || 'cypress/cloud-export';
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 

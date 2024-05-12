@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import axios from 'axios';
 import fs from 'fs/promises';
 import { Buffer } from 'buffer';
+import { logger } from '../logger.js'; // Import the logger
 
 dotenv.config();
 
@@ -25,14 +26,14 @@ const getJiraIssue = async () => {
     };
 
     const response = await axios.get(url, { headers });
-    console.log(response.data);
-    console.log(response.data.fields.labels);
-    //console.log(response.data.fields.issuelinks);
-    //console.log(response.data.fields.issuelinks[0].type); // Output the issue details
+    console.log(response.data); // Log the full response data
+    console.log(response.data.fields.labels); // Log specific parts of the data
+    //logger.info(response.data.fields.issuelinks); // Uncomment if needed
+    //logger.info(response.data.fields.issuelinks[0].type); // Log specific issue details
   } catch (error) {
-    console.error('Error fetching Jira issue:', error.message);
-    console.error('Error status:', error.response.status);
-    console.error('Error data:', error.response.data);
+    logger.error(`Error fetching Jira issue: ${error.message}`); // Log the error message
+    logger.error(`Error status: ${error.response.status}`); // Log the status code
+    logger.error(`Error data: ${error.response.data}`); // Log the error data
   }
 };
 

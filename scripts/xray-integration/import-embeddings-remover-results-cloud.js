@@ -6,7 +6,7 @@ import { logger } from '../logger.js'; // Import logger from the logger.js modul
 const jsonFilesDir = path.join('cypress', 'cucumber-json');
 
 // Define the path to the output directory at the project root
-const outputDir = path.join('cloud-import-results');
+const outputDir = path.join('cypress', 'cloud-import-results');
 
 try {
   logger.start('import-embeddings-remover-results-cloud');
