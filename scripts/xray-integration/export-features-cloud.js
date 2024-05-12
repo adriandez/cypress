@@ -7,9 +7,9 @@ import { logger } from '../logger.js'; // Import the custom logger
 
 dotenv.config();
 
-const { EXPORT_DIR, BASE_URL, KEYS, KEY } = process.env;
+const { EXPORT_DIR, BASE_URL, EXPORT_ISSUE_KEYS, KEY } = process.env;
 
-if (!EXPORT_DIR || !BASE_URL || !KEYS || !KEY) {
+if (!EXPORT_DIR || !BASE_URL || !EXPORT_ISSUE_KEYS || !KEY) {
   logger.error('Error: Missing required environment variables.');
   process.exit(1);
 }
@@ -34,9 +34,9 @@ const authenticate = async () => {
 
 const downloadFeatures = async (token) => {
   logger.info('downloadFeatures');
-  logger.info(`${BASE_URL}/api/v2/export/cucumber?keys=${KEYS}`);
+  logger.info(`${BASE_URL}/api/v2/export/cucumber?keys=${EXPORT_ISSUE_KEYS}`);
   const response = await axios.get(
-    `${BASE_URL}/api/v2/export/cucumber?keys=${KEYS}`,
+    `${BASE_URL}/api/v2/export/cucumber?keys=${EXPORT_ISSUE_KEYS}`,
     {
       responseType: 'stream',
       headers: {

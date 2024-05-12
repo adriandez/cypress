@@ -70,48 +70,27 @@ export const logger = {
       case 'ATTEMPT':
         return '\x1b[36m'; // cyan
       case 'SUCCESS':
-        return '\x1b[32m'; // bold green
+        return '\x1b[32m'; // green
       default:
         return '\x1b[0m'; // reset
     }
   },
 
-  // Format the message for logging with borders and timestamps
+  // Dynamically adjust border length based on message length
   formatMessage: (level, timestamp, message) => {
     const prefix = `[${level}] [${timestamp}] - `;
-    const lineLength = 130 - prefix.length;
-    const maxMessageLength = message.length + prefix.length;
-    const borderLength = Math.max(maxMessageLength, 60); // Ensure minimum border length of 60
-    const borderType =
-      level === 'DEBUG'
-        ? '-'
-        : level === 'ATTEMPT' || level === 'SUCCESS'
-          ? '='
-          : '*';
-    const border = borderType.repeat(borderLength);
+    const fullMessage = `${prefix}${message}`;
     const lines = [];
 
-    // Add borders for certain log levels
-    if (
-      level === 'START' ||
-      level === 'END' ||
-      level === 'ATTEMPT' ||
-      level === 'SUCCESS' ||
-      level === 'DEBUG'
-    ) {
+    // Check if borders are required for the log level
+    if (['START', 'END', 'DEBUG'].includes(level)) {
+      const border = '*'.repeat(fullMessage.length); // Create a border that matches the length of the full message
       lines.push(border);
-    }
-
-    lines.push(`${prefix}${message}`);
-
-    if (
-      level === 'START' ||
-      level === 'END' ||
-      level === 'ATTEMPT' ||
-      level === 'SUCCESS' ||
-      level === 'DEBUG'
-    ) {
+      lines.push(fullMessage);
       lines.push(border);
+    } else {
+      // No borders for 'ATTEMPT', 'SUCCESS', and other levels
+      lines.push(fullMessage);
     }
 
     return lines;

@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import { logger } from '../logger.js'; // Added import for custom logger
 
 dotenv.config();
 
@@ -10,8 +11,9 @@ const TEST_BROWSER = process.env.TEST_BROWSER || 'chrome';
 const JIRA_TEST_EXECUTION_ID =
   process.env.JIRA_TEST_EXECUTION_ID || 'default_issuetype_id';
 
-console.log('JIRA_PROJECT_ID:', process.env.JIRA_PROJECT_ID);
-console.log('JIRA_TEST_EXECUTION_ID:', process.env.JIRA_TEST_EXECUTION_ID);
+logger.start('import-prepare-info-result-cloud');
+logger.info('JIRA_PROJECT_ID: ' + process.env.JIRA_PROJECT_ID);
+logger.info('JIRA_TEST_EXECUTION_ID: ' + process.env.JIRA_TEST_EXECUTION_ID);
 
 const getOS = () => {
   const platform = os.platform();
@@ -46,15 +48,15 @@ const osType = getOS();
 const browser = TEST_BROWSER;
 
 if (osType === 'unsupported') {
-  console.error('Unsupported OS detected');
+  logger.error('Unsupported OS detected');
 } else {
-  console.log('Ready to process files...');
+  logger.attempting('Process files...');
 }
 
 const readDirectories = (dir, callback) => {
   fs.readdir(dir, { withFileTypes: true }, (err, entries) => {
     if (err) {
-      console.error('Failed to read directory', err);
+      logger.error('Failed to read directory: ' + err);
       return;
     }
     entries.forEach((entry) => {
@@ -79,9 +81,9 @@ const processFile = (filePath, fileName) => {
 
   fs.writeFile(newFilePath, JSON.stringify(localJsonObject, null, 2), (err) => {
     if (err) {
-      console.error(`Failed to write file ${newFileName}`, err);
+      logger.error(`Failed to write file ${newFileName}: ` + err);
     } else {
-      console.log(`File written: ${newFilePath}`);
+      logger.success(`File written ${newFilePath}`);
     }
   });
 };

@@ -3,24 +3,19 @@ import path from 'path';
 import axios from 'axios';
 import dotenv from 'dotenv';
 import FormData from 'form-data';
+import { logger } from '../logger.js'; // Adjusted import path to match your folder structure
 
 dotenv.config();
 
-// Logging function with timestamp
-const log = (message) => {
-  console.log(`${new Date().toISOString()} - ${message}`);
-};
-
-// Load environment variables
 const { DIRECTORY, BASE_URL } = process.env;
 
 if (!DIRECTORY) {
-  log('Error: DIRECTORY not set in .env file.');
+  logger.error('DIRECTORY not set in .env file.');
   process.exit(1);
 }
 
 if (!BASE_URL) {
-  log('Error: BASE_URL not set in .env file.');
+  logger.error('BASE_URL not set in .env file.');
   process.exit(1);
 }
 
@@ -39,7 +34,7 @@ const authenticate = async () => {
     );
     return response.data;
   } catch (error) {
-    log('Error: Failed to authenticate. Check credentials and network.');
+    logger.error('Failed to authenticate. Check credentials and network.');
     process.exit(1);
   }
 };
@@ -62,7 +57,7 @@ const uploadFile = async (token, cucumberFilePath, infoFilePath) => {
     );
     return response;
   } catch (error) {
-    log(
+    logger.error(
       `Failed to upload files ${cucumberFilePath} and ${infoFilePath}. Error: ${error.message}`
     );
   }
@@ -83,41 +78,44 @@ const findFiles = (dir, pattern) => {
 };
 
 const main = async () => {
-  log('Starting script to upload JSON files to Xray.');
+  logger.start('Upload JSON files to Xray.');
 
   // Authenticate
-  log('Authenticating to retrieve token...');
+  logger.attempting('Authenticating to retrieve token...');
   const token = await authenticate();
 
   const cucumberFiles = findFiles(DIRECTORY, '.cucumber.json');
 
   if (cucumberFiles.length === 0) {
-    log('No cucumber JSON files found in the directory.');
+    logger.warn('No cucumber JSON files found in the directory.');
     return;
   }
 
   for (const cucumberFile of cucumberFiles) {
     const infoFile = cucumberFile.replace('.cucumber.json', '-info.json');
     if (!fs.existsSync(infoFile)) {
-      log(`Info file missing for ${cucumberFile}`);
+      logger.error(`Info file missing for ${cucumberFile}`);
       continue;
     }
-    log(`Uploading ${cucumberFile} and ${infoFile} to Xray...`);
+    logger.attempting(`Uploading ${cucumberFile} and ${infoFile} to Xray...`);
     const response = await uploadFile(token, cucumberFile, infoFile);
 
     if (response && response.status === 200) {
-      log(`Files ${cucumberFile} and ${infoFile} uploaded successfully.`);
+      logger.success(
+        `Files ${cucumberFile} and ${infoFile} uploaded successfully.`
+      );
+      logger.success(`${infoFile} uploaded successfully.`);
     } else {
-      log(
+      logger.error(
         `Failed to upload files. HTTP status: ${response ? response.status : 'unknown'}`
       );
     }
   }
 
-  log('Script completed.');
+  logger.end('Upload JSON files to Xray completed.');
 };
 
 main().catch((error) => {
-  log(`Unexpected error: ${error.message}`);
+  logger.error(`Unexpected error: ${error.message}`);
   process.exit(1);
 });
