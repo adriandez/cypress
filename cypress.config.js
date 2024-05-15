@@ -3,6 +3,7 @@ import cucumberPreprocessor from 'cypress-cucumber-preprocessor';
 import { getConfig } from './get-config.js';
 import fsPromises from 'fs/promises'; // For async operations
 import fs from 'fs'; // For synchronous operations
+import path from 'path';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -35,6 +36,20 @@ const getLogFlags = () =>
     {}
   );
 
+const findScreenshotRecursively = async (dir, screenshotFileName) => {
+  const files = await fsPromises.readdir(dir, { withFileTypes: true });
+  for (const file of files) {
+    const res = path.resolve(dir, file.name);
+    if (file.isDirectory()) {
+      const result = await findScreenshotRecursively(res, screenshotFileName);
+      if (result) return result;
+    } else if (file.name === screenshotFileName) {
+      return res;
+    }
+  }
+  return null;
+};
+
 export default defineConfig({
   e2e: {
     async setupNodeEvents(on, config) {
@@ -64,6 +79,15 @@ export default defineConfig({
             console.log(`File not found at path: ${filePath}`); // Added log
           }
           return null; // File does not exist
+        },
+        findScreenshot({ screenshotsFolder, screenshotFileName }) {
+          console.log(
+            `Searching for screenshot '${screenshotFileName}' in folder '${screenshotsFolder}'`
+          );
+          return findScreenshotRecursively(
+            screenshotsFolder,
+            screenshotFileName
+          );
         }
       });
 

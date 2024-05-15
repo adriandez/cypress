@@ -67,7 +67,8 @@ const processFeatureFiles = async () => {
 
   for (const file of exportFiles) {
     const fileName = path.basename(file);
-    const keyNum = fileName.split(' ')[0];
+    const split = fileName.split('-');
+    const keyNum = split[0] + '-' + split[1];
     const targetFilePath = targetFiles.find((f) =>
       path.basename(f).startsWith(keyNum)
     );

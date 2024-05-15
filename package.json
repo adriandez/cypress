@@ -6,6 +6,8 @@
   "main": "index.js",
   "scripts": {
     "cytest": "node runCypressTests.js",
+    "resetIt": "node reset-directory.js --reset cypress/e2e/cucumber/feature,cypress/support/actions,cypress/support/page-objects,scripts/logs,cypress/e2e/cucumber/step-definitions",
+    "initFeatures": "node scripts/xray-integration/export-features-cloud.js && node scripts/cypress-test-orchestrator/initializeFeatureAssets.js",
     "clearReports": "node reset-directory.js --reset cypress/reports",
     "pretest": "node reset-directory.js --reset cypress/cucumber-json,cypress/cloud-import-results",
     "test": "node runCypressTests.js || exit 0",

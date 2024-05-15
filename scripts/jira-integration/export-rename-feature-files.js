@@ -29,7 +29,7 @@ const getJiraIssueSummary = async (issueKey) => {
     logger.error(
       `Error fetching Jira issue for key ${issueKey}: ${error.message}`
     );
-    return null; // Return null if there is an error
+    return null;
   }
 };
 
@@ -39,12 +39,22 @@ const renameFeatureFiles = async () => {
     const featureFiles = files.filter((file) => file.endsWith('.feature'));
 
     for (const file of featureFiles) {
-      const issueKey = file.split('.')[0]; // Assuming the issue key is the part before the first dot in the filename
+      const issueKey = file.split('.')[0];
       const summary = await getJiraIssueSummary(issueKey);
       if (summary) {
-        // Assuming the summary always starts with the issue key followed by a space
-        const cleanSummary = summary.replace(`${issueKey} `, ''); // Remove the issue key and trailing space from the summary
-        const newFilename = `${issueKey} ${cleanSummary}.feature`;
+        const cleanSummary = summary.replace(`${issueKey} `, '');
+        logger.debug(`------>>cleanSummary:${cleanSummary}`);
+
+        const lowerCaseCleanSummary = cleanSummary.toLocaleLowerCase();
+        logger.debug(`------>>lowerCaseCleanSummary:${lowerCaseCleanSummary}`);
+
+        const kebabCaseCleanSummary = lowerCaseCleanSummary.replace(/ /g, '-');
+        logger.debug(`------>>kebabCaseCleanSummary:${kebabCaseCleanSummary}`);
+
+        const newFilename = `${issueKey}-${kebabCaseCleanSummary}.feature`;
+        logger.debug(`------>>newFilename:${newFilename}`);
+
+        logger.debug(`------>>file:${file}`);
         await fs.rename(
           path.join(EXPORT_DIR, file),
           path.join(EXPORT_DIR, newFilename)

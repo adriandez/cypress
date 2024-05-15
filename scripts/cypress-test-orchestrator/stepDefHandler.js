@@ -22,16 +22,7 @@ export const handleStepDefinitions = (
         stepDefDir,
         featureFileDetails,
         '-step-def.js',
-        `
-import { Given, When, Then } from 'cypress-cucumber-preprocessor/steps';
-import { template } from '../../../../support/actions/';
-
-Given('template', () => {});
-
-When('template', () => {});
-
-Then('template', () => {});
-        `,
+        'utilities-import',
         true
       );
     }

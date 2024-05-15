@@ -2,24 +2,21 @@ import fs from 'fs/promises';
 import path from 'path';
 import dotenv from 'dotenv';
 import { logger } from '../logger.js';
+import { fillTemplateWithData } from './stepDefTemplate.js';
 
-// Load environment settings
 dotenv.config();
 
-// Define base directories for Cypress tests and supporting files
 const baseDir = 'cypress/e2e/cucumber';
 const featureDir = path.join(baseDir, 'feature');
 const stepDefDir = path.join(baseDir, 'step-definitions');
 const actionsDir = 'cypress/support/actions';
 const pageObjectsDir = path.join('cypress/support/page-objects');
 
-// Log the initial setup information for directories
 logger.info(`Starting script. Feature directory: ${featureDir}`);
 logger.info(`Step definitions directory: ${stepDefDir}`);
 logger.info(`Actions directory: ${actionsDir}`);
 logger.info(`Page Objects directory: ${pageObjectsDir}`);
 
-// Extracts a key number from a filename typically formatted with a key at the start
 export const extractKeyNumFromFileName = (fileName) => {
   try {
     const match = fileName.match(/^([^-]+-\d+)/);
@@ -34,7 +31,6 @@ export const extractKeyNumFromFileName = (fileName) => {
   }
 };
 
-// Process directories recursively, applying an async handler function to each file
 export const processDirectory = async (dir, fileHandler, relativePath = '') => {
   try {
     logger.info(`Processing directory: ${dir}`);
@@ -48,9 +44,9 @@ export const processDirectory = async (dir, fileHandler, relativePath = '') => {
 
       if (stat.isDirectory()) {
         logger.info(`Entering directory: ${filePath}`);
-        await processDirectory(filePath, fileHandler, fileRelativePath); // Ensure recursive calls are awaited
+        await processDirectory(filePath, fileHandler, fileRelativePath);
       } else {
-        await fileHandler(file, filePath, fileRelativePath); // Await handler to complete processing each file
+        await fileHandler(file, filePath, fileRelativePath);
       }
     }
   } catch (error) {
@@ -58,7 +54,6 @@ export const processDirectory = async (dir, fileHandler, relativePath = '') => {
   }
 };
 
-// Create folders and files for features, handling templates for standard file content
 export const createFolderAndFile = async (
   baseDir,
   featureFileDetails,
@@ -71,7 +66,16 @@ export const createFolderAndFile = async (
   logger.info(`Creating folder and file for feature: ${featureFileName}`);
 
   try {
+    // Conditional handling for step definition templates
+    if (fileType === '-step-def.js' && templateCode === 'utilities-import') {
+      templateCode = await fillTemplateWithData(featurePath, featureFileName);
+      if (!templateCode) {
+        throw new Error('Template code is null or undefined.');
+      }
+    }
+
     const featureFolderPath = path.dirname(featurePath);
+
     const newFolderPath = createExtraFolder
       ? path.join(
           baseDir,
@@ -81,8 +85,12 @@ export const createFolderAndFile = async (
       : path.join(baseDir, featureFolderPath);
     logger.info(`New folder path: ${newFolderPath}`);
 
-    await fs.mkdir(newFolderPath, { recursive: true });
-    logger.info(`Created directories up to: ${newFolderPath}`);
+    try {
+      await fs.mkdir(newFolderPath, { recursive: true });
+      logger.info(`Created directories up to: ${newFolderPath}`);
+    } catch (error) {
+      logger.error(`fs.mkdire: ${error.message}. Error: ${error}`);
+    }
 
     const newFileName = featureFileName
       .replace(/^[^-]+-\d+-/, '')
@@ -93,19 +101,26 @@ export const createFolderAndFile = async (
     await fs.writeFile(newFilePath, templateCode);
     logger.info(`Created file: ${newFilePath} with template code`);
   } catch (error) {
-    logger.error(
-      `Failed to create folder or file for feature: ${featureFileName}. Error: ${error}`
-    );
+    if (error.code === 'ENOENT') {
+      logger.error(`Feature file not found: ${featurePath}`);
+    } else {
+      logger.error(
+        `Failed to create folder or file for feature: ${featureFileName}. Error: ${error}`
+      );
+    }
   }
 };
 
-// Main function to run the script
 const main = async () => {
   try {
-    // Simulate processing of directories and file operations
     await processDirectory(featureDir, async (file, filePath) => {
-      // Placeholder for what might happen in fileHandler
-      logger.info(`Handling file: ${file} at ${filePath}`);
+      await createFolderAndFile(
+        stepDefDir,
+        { path: filePath, file },
+        '-step-def.js',
+        fillTemplateWithData
+      );
+      logger.info(`Handled feature file: ${filePath}`);
     });
   } catch (error) {
     logger.error(

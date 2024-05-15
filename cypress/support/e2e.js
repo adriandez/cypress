@@ -33,24 +33,29 @@ afterEach(function () {
     const testState = window.testState;
     const stepResult =
       testState.runTests[testState.currentScenario.name][testState.currentStep];
-    const featureName = this.currentTest.parent.title.toLowerCase();
+    const featureName = this.currentTest.parent.title;
+    const screenshotFileName = `${featureName} -- ${this.currentTest.title} (failed).png`;
 
     if (screenshotsEnabled) {
-      const absoluteFilePath =
-        this.currentTest.parent.invocationDetails.absoluteFile;
-      const relativeFilePath = absoluteFilePath.split('cucumber/feature/')[1];
-      const normalizedPath = relativeFilePath.replace(/\\/g, '/');
-      const screenshotFileName = `${featureName} -- ${this.currentTest.title} (failed).png`;
-      const filePath = `${screenshotsFolder}/${normalizedPath}/${screenshotFileName}`;
-
-      cy.safeReadFile(filePath, 'base64').then((imgData) => {
-        if (imgData) {
-          cy.log(`Attaching image: ${filePath}`);
-          attachScreenshotToReport(imgData, stepResult, testState);
-        } else {
-          cy.log(`Screenshot not found at ${filePath}`);
-        }
+      cy.customLog(`Searching for screenshot: ${screenshotFileName}`, {
+        type: 'info'
       });
+      cy.task('findScreenshot', { screenshotsFolder, screenshotFileName }).then(
+        (filePath) => {
+          if (filePath) {
+            cy.safeReadFile(filePath, 'base64').then((imgData) => {
+              if (imgData) {
+                cy.log(`Attaching image: ${filePath}`);
+                attachScreenshotToReport(imgData, stepResult, testState);
+              } else {
+                cy.log(`Screenshot not found at ${filePath}`);
+              }
+            });
+          } else {
+            cy.log(`Screenshot not found for feature: ${featureName}`);
+          }
+        }
+      );
     }
   }
 });
