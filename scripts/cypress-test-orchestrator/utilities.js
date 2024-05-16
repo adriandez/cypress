@@ -66,7 +66,6 @@ export const createFolderAndFile = async (
   logger.info(`Creating folder and file for feature: ${featureFileName}`);
 
   try {
-    // Conditional handling for step definition templates
     if (fileType === '-step-def.js' && templateCode === 'utilities-import') {
       templateCode = await fillTemplateWithData(featurePath, featureFileName);
       if (!templateCode) {
@@ -92,9 +91,7 @@ export const createFolderAndFile = async (
       logger.error(`fs.mkdire: ${error.message}. Error: ${error}`);
     }
 
-    const newFileName = featureFileName
-      .replace(/^[^-]+-\d+-/, '')
-      .replace('.feature', fileType);
+    const newFileName = featureFileName.replace('.feature', fileType);
     const newFilePath = path.join(newFolderPath, newFileName);
     logger.info(`New file path: ${newFilePath}`);
 

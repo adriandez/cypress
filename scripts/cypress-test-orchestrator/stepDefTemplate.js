@@ -3,18 +3,15 @@ import path from 'path';
 import dotenv from 'dotenv';
 import { logger } from '../logger.js';
 
-// Load environment settings
 dotenv.config();
 
 const baseDir =
   process.env.PROJECT_FEATURE_DIR || 'cypress/e2e/cucumber/feature';
 const stepDefDir = path.join(baseDir, '../step-definitions');
 
-// Log the initial setup information for directories
 logger.info(`Starting script. Feature directory: ${baseDir}`);
 logger.info(`Step definitions directory: ${stepDefDir}`);
 
-// Read and parse a .feature file
 const readFeatureFile = async (featureFilePath) => {
   try {
     await fs.access(featureFilePath);
@@ -33,32 +30,49 @@ const parseFeatureFile = (data) => {
   const featureObject = { scenarios: [] };
 
   let currentScenario = null;
+  let isBackground = false;
+  let lastKeyword = '';
 
   lines.forEach((line) => {
     const trimmedLine = line.trim();
     if (trimmedLine.startsWith('Feature:')) {
       featureObject.feature = trimmedLine.replace('Feature: ', '').trim();
+    } else if (trimmedLine.startsWith('Background:')) {
+      isBackground = true;
     } else if (trimmedLine.startsWith('Scenario:')) {
+      isBackground = false;
       currentScenario = {
         name: trimmedLine.replace('Scenario: ', '').trim(),
         steps: []
       };
       featureObject.scenarios.push(currentScenario);
-    } else if (trimmedLine.startsWith('Given ')) {
-      currentScenario.steps.push({
-        keyword: 'Given',
-        text: trimmedLine.replace('Given ', '').trim()
-      });
-    } else if (trimmedLine.startsWith('When ')) {
-      currentScenario.steps.push({
-        keyword: 'When',
-        text: trimmedLine.replace('When ', '').trim()
-      });
-    } else if (trimmedLine.startsWith('Then ')) {
-      currentScenario.steps.push({
-        keyword: 'Then',
-        text: trimmedLine.replace('Then ', '').trim()
-      });
+    } else if (
+      !isBackground &&
+      (trimmedLine.startsWith('Given ') ||
+        trimmedLine.startsWith('When ') ||
+        trimmedLine.startsWith('Then ') ||
+        trimmedLine.startsWith('And '))
+    ) {
+      let keyword = trimmedLine.split(' ')[0];
+      if (keyword === 'And') {
+        keyword = lastKeyword;
+      } else {
+        lastKeyword = keyword;
+      }
+      const text = trimmedLine
+        .replace(/^(Given|When|Then|And) /, '')
+        .trim()
+        .replace(/'/g, "\\'");
+      const step = {
+        keyword,
+        text
+      };
+
+      if (currentScenario) {
+        currentScenario.steps.push(step);
+      } else {
+        logger.error(`Step found without a scenario: ${trimmedLine}`);
+      }
     }
   });
 
