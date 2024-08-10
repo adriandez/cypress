@@ -1,0 +1,5 @@
+# Enforce LF line endings for shell scripts and config files
+build/*.sh text eol=lf
+build/Dockerfile text eol=lf
+build/Jenkinsfile text eol=lf
+build/k8s/*.yaml text eol=lf
