@@ -7,12 +7,15 @@ WORKDIR /app
 # Copy the headless dependencies installation script
 COPY build/install-headless-dependencies.sh /usr/local/bin/install-headless-dependencies.sh
 
-# Add debugging to check if the script is present
-RUN ls -al /usr/local/bin/
-RUN ls -al /app/
+# Add debugging to check if the script is present and list environment variables
+RUN ls -al /usr/local/bin/ && \
+    ls -al /app/ && \
+    env && \
+    pwd
 
 # Make the script executable and run it
-RUN chmod +x /usr/local/bin/install-headless-dependencies.sh && /usr/local/bin/install-headless-dependencies.sh
+RUN chmod +x /usr/local/bin/install-headless-dependencies.sh && \
+    /bin/bash /usr/local/bin/install-headless-dependencies.sh
 
 # Install bash and debugging tools
 RUN apt-get update && apt-get install -y bash procps

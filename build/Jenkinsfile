@@ -24,7 +24,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    bat "docker build -t ${DOCKER_IMAGE} -f build/Dockerfile ."
+                    bat "docker build --no-cache -t ${DOCKER_IMAGE} -f build/Dockerfile ."
                 }
             }
         }
