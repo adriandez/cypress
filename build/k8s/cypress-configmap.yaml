@@ -28,3 +28,7 @@ data:
   IMPORT_EMBEDDINGS_REMOVER_RESULTS_CLOUD: 'false'
   IMPORT_PREPARE_INFO_RESULT_CLOUD: 'false'
   IMPORT_MULTIPART_RESULTS_CLOUD: 'false'
+  LOCAL_BASE_URL: 'http://localhost:3000'
+  DEVELOP_BASE_URL: 'https://www.google.com'
+  TESTING_BASE_URL: 'https://www.google.com'
+  PREPRODUCTION_BASE_URL: 'https://www.google.com'
