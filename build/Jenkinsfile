@@ -45,7 +45,7 @@ pipeline {
             steps {
                 script {
                     // Assuming you have your kubeconfig stored as a Jenkins credential
-                    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                    withCredentials([file(credentialsId: 'docker-desktop-kubeconfig', variable: 'KUBECONFIG')]) {
                         bat "kubectl apply -f ${CONFIGMAP_PATH} --kubeconfig=%KUBECONFIG%"
                         bat "kubectl apply -f ${JOB_PATH} --kubeconfig=%KUBECONFIG%"
                     }
