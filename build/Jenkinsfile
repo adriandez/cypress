@@ -30,15 +30,17 @@ pipeline {
         }
         
         stage('Push Docker Image') {
-            steps {
-                script {
-                    withDockerRegistry([ credentialsId: 'dockerhub-credentials', url: 'https://index.docker.io/v1/' ]) {
-                        bat "docker push ${DOCKER_IMAGE}"
-                    }
-                }
+    steps {
+        script {
+            def dockerImage = "adriandez/cypress-automation:latest"
+
+            withDockerRegistry([credentialsId: 'dockerhub-credentials', url: 'https://index.docker.io/v1/']) {
+                bat "docker push ${dockerImage}"
             }
         }
-        
+    }
+}
+
         stage('Deploy to Kubernetes') {
             steps {
                 script {
