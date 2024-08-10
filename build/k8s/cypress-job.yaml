@@ -13,7 +13,7 @@ spec:
       - name: cypress-e2e-tests-chrome
         image: adriandez/cypress-automation:latest
         command: ["/bin/bash", "-c"]
-        args: ["/usr/local/bin/run-tests.sh"]
+        args: ["trap : TERM INT; sleep infinity & wait"]
         envFrom:
         - configMapRef:
             name: cypress-env

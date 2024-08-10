@@ -61,5 +61,8 @@ RUN ls -l /usr/local/bin/
 # Copy the rest of your project files into the Docker image
 COPY . .
 
+# Debugging step to verify that files are copied
+RUN ls -la /app/
+
 # Default command to run when starting the container
 CMD ["/usr/local/bin/run-tests.sh"]
