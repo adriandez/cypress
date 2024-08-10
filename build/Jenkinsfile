@@ -41,7 +41,7 @@ pipeline {
             }
         }
 
-        tage('Deploy to Kubernetes') {
+        stage('Deploy to Kubernetes') {
             steps {
                 script {
                     // Assuming you have your kubeconfig stored as a Jenkins credential
