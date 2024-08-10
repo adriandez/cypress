@@ -25,7 +25,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh "docker build -t ${DOCKER_IMAGE} -f ${DOCKERFILE_PATH} ."
+                    bat "docker build -t ${DOCKER_IMAGE} -f ${DOCKERFILE_PATH} ."
                 }
             }
         }
@@ -34,7 +34,7 @@ pipeline {
             steps {
                 script {
                     withDockerRegistry([ credentialsId: 'dockerhub-credentials', url: 'https://index.docker.io/v1/' ]) {
-                        sh "docker push ${DOCKER_IMAGE}"
+                        bat "docker push ${DOCKER_IMAGE}"
                     }
                 }
             }
@@ -43,8 +43,8 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    sh "kubectl apply -f ${CONFIGMAP_PATH}"
-                    sh "kubectl apply -f ${JOB_PATH}"
+                    bat "kubectl apply -f ${CONFIGMAP_PATH}"
+                    bat "kubectl apply -f ${JOB_PATH}"
                 }
             }
         }
