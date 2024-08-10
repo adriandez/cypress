@@ -7,6 +7,10 @@ WORKDIR /app
 # Copy the headless dependencies installation script
 COPY build/install-headless-dependencies.sh /usr/local/bin/install-headless-dependencies.sh
 
+# Add debugging to check if the script is present
+RUN ls -al /usr/local/bin/
+RUN ls -al /app/
+
 # Make the script executable and run it
 RUN chmod +x /usr/local/bin/install-headless-dependencies.sh && /usr/local/bin/install-headless-dependencies.sh
 
