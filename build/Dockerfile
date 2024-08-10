@@ -49,9 +49,14 @@ ENV XDG_RUNTIME_DIR=/tmp
 # Set correct permissions for /tmp, /var/tmp, and /dev/shm
 RUN chmod 1777 /tmp /var/tmp /dev/shm
 
-# Copy the test run script and make it executable
+# Copy the script
 COPY build/run-tests.sh /usr/local/bin/run-tests.sh
-RUN chmod +x /usr/local/bin/run-tests.sh
+
+# Add a debug step to list files in /usr/local/bin/ before running chmod
+RUN ls -l /usr/local/bin/ && chmod +x /usr/local/bin/run-tests.sh
+
+# Add another debug step to verify permissions after chmod
+RUN ls -l /usr/local/bin/
 
 # Copy the rest of your project files into the Docker image
 COPY . .
