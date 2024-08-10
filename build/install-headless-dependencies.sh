@@ -4,6 +4,9 @@ set -e
 # Update package lists
 apt-get update
 
+# Upgrade existing packages
+apt-get upgrade -y
+
 # Install necessary dependencies for running browsers headlessly
 # Note: This list should be kept in sync with your Dockerfile requirements
 apt-get install -y --no-install-recommends \
@@ -32,7 +35,8 @@ apt-get install -y --no-install-recommends \
     libxcomposite1 \
     libxdamage1 \
     libxrandr2 \
-    xdg-utils
+    xdg-utils \
+    x11-utils
 
 # Generate the machine-id
 dbus-uuidgen > /var/lib/dbus/machine-id

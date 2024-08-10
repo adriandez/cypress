@@ -1,19 +1,28 @@
-FROM node:20.11.0
+# Base image
+FROM node:20.15.1
 
+# Set the working directory
 WORKDIR /app
 
-# Install necessary dependencies for running browsers headlessly
+# Copy the headless dependencies installation script
 COPY build/install-headless-dependencies.sh /usr/local/bin/install-headless-dependencies.sh
+
+# Make the script executable and run it
 RUN chmod +x /usr/local/bin/install-headless-dependencies.sh && /usr/local/bin/install-headless-dependencies.sh
 
-ARG INSTALL_BROWSER
+# Install bash and debugging tools
+RUN apt-get update && apt-get install -y bash procps
+
+# Set the INSTALL_BROWSER argument and environment variable
+ARG INSTALL_BROWSER=chrome
+ENV INSTALL_BROWSER=${INSTALL_BROWSER}
 
 # Copy the browser installation script into the Docker image and execute it
 COPY build/install-browser.sh /usr/local/bin/install-browser.sh
 RUN chmod +x /usr/local/bin/install-browser.sh && /usr/local/bin/install-browser.sh
 
 # Copy package.json and package-lock.json into the Docker image
-COPY package*.json ./
+COPY package.json package-lock.json ./
 
 # Update npm to the latest version
 RUN npm install -g npm@latest
@@ -23,20 +32,18 @@ RUN npm ci
 
 # Set environment variables
 ENV DISPLAY=:99
-ENV DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
 ENV TERM=xterm
 ENV XDG_RUNTIME_DIR=/tmp
 
-# Copy custom scripts and make them executable
-COPY build/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-COPY build/verify-cypress.sh /usr/local/bin/verify-cypress.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh /usr/local/bin/verify-cypress.sh
+# Set correct permissions for /tmp, /var/tmp, and /dev/shm
+RUN chmod 1777 /tmp /var/tmp /dev/shm
 
-# Set docker-entrypoint.sh as the entrypoint
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+# Copy the test run script and make it executable
+COPY build/run-tests.sh /usr/local/bin/run-tests.sh
+RUN chmod +x /usr/local/bin/run-tests.sh
 
 # Copy the rest of your project files into the Docker image
 COPY . .
 
 # Default command to run when starting the container
-CMD ["npx", "cypress", "run", "--headless"]
+CMD ["/usr/local/bin/run-tests.sh"]

@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -e
 
 case "$INSTALL_BROWSER" in
@@ -25,5 +24,46 @@ case "$INSTALL_BROWSER" in
     *)
         echo "Unsupported browser: $INSTALL_BROWSER. Exiting."
         exit 1
+        ;;
+esac
+
+# Verify that the browser installation was successful
+case "$INSTALL_BROWSER" in
+    chrome)
+        if ! command -v google-chrome &> /dev/null; then
+            echo "Google Chrome installation failed."
+            exit 1
+        else
+            echo "Google Chrome installed successfully."
+        fi
+        ;;
+    firefox)
+        if ! command -v firefox &> /dev/null; then
+            echo "Firefox installation failed."
+            exit 1
+        else
+            echo "Firefox installed successfully."
+        fi
+        ;;
+    edge)
+        if ! command -v microsoft-edge &> /dev/null; then
+            echo "Microsoft Edge installation failed."
+            exit 1
+        else
+            echo "Microsoft Edge installed successfully."
+        fi
+        ;;
+esac
+
+# Output version of the installed browser
+case "$INSTALL_BROWSER" in
+    chrome)
+        google-chrome --version
+        ;;
+    firefox)
+        firefox --version
+        ;;
+    edge)
+        microsoft-edge --version
         ;;
 esac

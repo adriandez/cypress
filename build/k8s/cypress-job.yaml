@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cypress-automation-debug
+  namespace: cypress-automation
+spec:
+  template:
+    metadata:
+      labels:
+        app: cypress-automation
+    spec:
+      containers:
+      - name: cypress-e2e-tests-chrome
+        image: adriandez/cypress-automation:latest
+        command: ["/bin/bash", "-c"]
+        args: ["/usr/local/bin/run-tests.sh"]
+        envFrom:
+        - configMapRef:
+            name: cypress-env
+        resources:
+          limits:
+            memory: "4Gi"
+            cpu: "2"
+          requests:
+            memory: "2Gi"
+            cpu: "1"
+        securityContext:
+          privileged: true
+      restartPolicy: Never
+  backoffLimit: 0

@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cypress-env
+  namespace: cypress-automation
+data:
+  DISPLAY: ':99'
+  TEST_ENV: develop
+  VIEWPORT_WIDTH: '1920'
+  VIEWPORT_HEIGHT: '1080'
+  TEST_BROWSER: chrome
+  ENABLE_VIDEO: 'true'
+  LOG_LEVEL: '4'
+  ENABLE_START_LOG: 'true'
+  ENABLE_END_LOG: 'true'
+  ENABLE_ERROR_LOG: 'true'
+  ENABLE_INFO_LOG: 'true'
+  ENABLE_ATTEMPTING_LOG: 'true'
+  ENABLE_SUCCESS_LOG: 'true'
+  ENABLE_WARNING_LOG: 'true'
+  XRAY_API_BASE_URL: https://xray.cloud.getxray.app
+  EXPORT_DIR: cypress/cloud-export
+  PROJECT_FEATURE_DIR: cypress/e2e/cucumber/feature
+  KEY: DEMO
+  PROJECT: DEMO
+  DIRECTORY: cypress/cloud-import-results
+  GENERATE_REPORT: 'true'
+  IMPORT_EMBEDDINGS_REMOVER_RESULTS_CLOUD: 'false'
+  IMPORT_PREPARE_INFO_RESULT_CLOUD: 'false'
+  IMPORT_MULTIPART_RESULTS_CLOUD: 'false'

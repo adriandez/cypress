@@ -11,7 +11,7 @@
     "clearReports": "node reset-directory.js --reset cypress/reports",
     "pretest": "node reset-directory.js --reset cypress/cucumber-json,cypress/cloud-import-results",
     "test": "node runCypressTests.js || exit 0",
-    "posttest": "node generate-report.js && node scripts/xray-integration/import-embeddings-remover-results-cloud.js && node scripts/xray-integration/import-prepare-info-result-cloud.js && node scripts/xray-integration/import-multipart-results-cloud.js",
+    "posttest": "node scripts/run-posttest-scripts.js",
     "lint-fix": "eslint . --fix",
     "lint": "eslint .",
     "format": "prettier --write ."
