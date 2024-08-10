@@ -21,9 +21,9 @@ import './commands';
 
 before(() => {
   cy.log('BEFORE');
-  cy.fixture('selector.json').then((data) => {
-    Cypress.env('selectorData', data);
-  });
+  //cy.fixture('selector.json').then((data) => {
+  //  Cypress.env('selectorData', data);
+  //});
 });
 
 afterEach(function () {
