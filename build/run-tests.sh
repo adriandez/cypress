@@ -26,3 +26,4 @@ echo "Xvfb started."
 # Run the tests
 echo "Running Cypress tests..."
 npm run test
+
