@@ -3,7 +3,6 @@ pipeline {
     
     environment {
         DOCKER_IMAGE = 'adriandez/cypress-automation:latest'
-        DOCKERFILE_PATH = 'build/Dockerfile'
         CONFIGMAP_PATH = 'build/k8s/cypress-configmap.yaml'
         JOB_PATH = 'build/k8s/cypress-job.yaml'
     }
@@ -25,7 +24,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    bat "docker build -t ${DOCKER_IMAGE} -f ${DOCKERFILE_PATH} ."
+                    bat "docker build -t ${DOCKER_IMAGE} -f build/Dockerfile ."
                 }
             }
         }
