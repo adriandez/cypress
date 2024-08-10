@@ -26,6 +26,10 @@ ENV INSTALL_BROWSER=${INSTALL_BROWSER}
 
 # Copy the browser installation script into the Docker image and execute it
 COPY build/install-browser.sh /usr/local/bin/install-browser.sh
+
+# Debugging: List files in /usr/local/bin/
+RUN ls -la /usr/local/bin/
+
 RUN chmod +x /usr/local/bin/install-browser.sh && /usr/local/bin/install-browser.sh
 
 # Copy package.json and package-lock.json into the Docker image

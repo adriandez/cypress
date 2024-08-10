@@ -27,7 +27,6 @@ case "$INSTALL_BROWSER" in
         ;;
 esac
 
-# Verify that the browser installation was successful
 case "$INSTALL_BROWSER" in
     chrome)
         if ! command -v google-chrome &> /dev/null; then
@@ -55,7 +54,6 @@ case "$INSTALL_BROWSER" in
         ;;
 esac
 
-# Output version of the installed browser
 case "$INSTALL_BROWSER" in
     chrome)
         google-chrome --version
@@ -67,3 +65,4 @@ case "$INSTALL_BROWSER" in
         microsoft-edge --version
         ;;
 esac
+
