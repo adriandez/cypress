@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cypress-automation-cron
+  namespace: cypress-automation
+spec:
+  schedule: "*/5 * * * *"  # This will run every 5 minutes
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: cypress-e2e-tests-chrome
+            image: adriandez/cypress-automation:latest
+            command: ["/bin/bash", "-c"]
+            args: ["/usr/local/bin/run-tests.sh"]
+            envFrom:
+            - configMapRef:
+                name: cypress-env
+            resources:
+              limits:
+                memory: "4Gi"
+                cpu: "2"
+              requests:
+                memory: "2Gi"
+                cpu: "1"
+            securityContext:
+              privileged: true
+          restartPolicy: Never
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1

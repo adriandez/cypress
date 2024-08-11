@@ -52,6 +52,7 @@ const deleteDirectoryContents = async (directory) => {
 const setupDirectories = async () => {
   try {
     for (const directory of directories) {
+      console.log(`--> Reset Directory <--`);
       console.log(`Starting to clean directory: ${directory}`);
       await deleteDirectoryContents(directory);
       console.log(`Contents deleted for directory: ${directory}`);

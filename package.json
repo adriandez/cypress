@@ -9,7 +9,7 @@
     "resetIt": "node reset-directory.js --reset cypress/e2e/cucumber/feature,cypress/support/actions,cypress/support/page-objects,scripts/logs,cypress/e2e/cucumber/step-definitions",
     "initFeatures": "node scripts/xray-integration/export-features-cloud.js && node scripts/cypress-test-orchestrator/initializeFeatureAssets.js",
     "clearReports": "node reset-directory.js --reset cypress/reports",
-    "pretest": "node reset-directory.js --reset cypress/cucumber-json,cypress/cloud-import-results",
+    "pretest": "node scripts/run-pretest-scripts.js",
     "test": "node runCypressTests.js || exit 0",
     "posttest": "node scripts/run-posttest-scripts.js",
     "lint-fix": "eslint . --fix",

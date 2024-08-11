@@ -5,6 +5,7 @@ pipeline {
         DOCKER_IMAGE = 'adriandez/cypress-automation:latest'
         CONFIGMAP_PATH = 'build/k8s/cypress-configmap.yaml'
         JOB_PATH = 'build/k8s/cypress-job.yaml'
+        CRON_JOB_PATH = 'build/k8s/cypress-cron-job.yaml'
     }
     
     stages {
@@ -48,6 +49,7 @@ pipeline {
                     withCredentials([file(credentialsId: 'docker-desktop-kubeconfig', variable: 'KUBECONFIG')]) {
                         bat "kubectl apply -f ${CONFIGMAP_PATH} --kubeconfig=%KUBECONFIG%"
                         bat "kubectl apply -f ${JOB_PATH} --kubeconfig=%KUBECONFIG%"
+                        bat "kubectl apply -f ${CRON_JOB_PATH} --kubeconfig=%KUBECONFIG%"
                     }
                 }
             }
