@@ -11,48 +11,48 @@ spec:
         spec:
           containers:
           - name: cypress-automation-chrome
-            image: cypress-automation:chrome
+            image: adriandez/cypress-automation:chrome
             imagePullPolicy: "Always"
             env:
-            - name: INSTALL_BROWSER
-              value: chrome
-            - name: TEST_BROWSER
-              value: chrome
-            - name: TEST_ENV
-              value: testing
+              - name: INSTALL_BROWSER
+                value: chrome
+              - name: TEST_BROWSER
+                value: chrome
+              - name: TEST_ENV
+                value: testing
             envFrom:
-            - configMapRef:
-                name: cypress-cron-env
+              - configMapRef:
+                  name: cypress-cron-env
             securityContext:
               privileged: true
           - name: cypress-automation-edge
-            image: cypress-automation:edge
+            image: adriandez/cypress-automation:edge
             imagePullPolicy: "Always"
             env:
-            - name: INSTALL_BROWSER
-              value: edge
-            - name: TEST_BROWSER
-              value: edge
-            - name: TEST_ENV
-              value: testing
+              - name: INSTALL_BROWSER
+                value: edge
+              - name: TEST_BROWSER
+                value: edge
+              - name: TEST_ENV
+                value: testing
             envFrom:
-            - configMapRef:
-                name: cypress-cron-env
+              - configMapRef:
+                  name: cypress-cron-env
             securityContext:
               privileged: true
           - name: cypress-automation-firefox
-            image: cypress-automation:firefox
+            image: adriandez/cypress-automation:firefox
             imagePullPolicy: "Always"
             env:
-            - name: INSTALL_BROWSER
-              value: firefox
-            - name: TEST_BROWSER
-              value: firefox
-            - name: TEST_ENV
-              value: testing
+              - name: INSTALL_BROWSER
+                value: firefox
+              - name: TEST_BROWSER
+                value: firefox
+              - name: TEST_ENV
+                value: testing
             envFrom:
-            - configMapRef:
-                name: cypress-cron-env
+              - configMapRef:
+                  name: cypress-cron-env
             securityContext:
               privileged: true
           imagePullSecrets:

@@ -12,19 +12,22 @@ spec:
       containers:
       - name: cypress-e2e-tests-chrome
         image: adriandez/cypress-automation:chrome
+        imagePullPolicy: Always
         command: ["/bin/bash", "-c"]
         args: ["/usr/local/bin/run-tests.sh"]
         env:
-            - name: INSTALL_BROWSER
-              value: chrome
-            - name: TEST_BROWSER
-              value: chrome
-            - name: TEST_ENV
-              value: testing
+          - name: INSTALL_BROWSER
+            value: chrome
+          - name: TEST_BROWSER
+            value: chrome
+          - name: TEST_ENV
+            value: testing
         envFrom:
-        - configMapRef:
-            name: cypress-env
+          - configMapRef:
+              name: cypress-env
         securityContext:
           privileged: true
       restartPolicy: Never
+      imagePullSecrets:
+      - name: regcred
   backoffLimit: 0
