@@ -6,6 +6,7 @@ pipeline {
         CONFIGMAP_PATH = 'build/k8s/cypress-configmap.yaml'
         CONFIGMAP_PATH_CRON = 'build/k8s/cypress-cron-configmap.yaml'
         JOB_TEMPLATE_PATH = 'build/k8s/cypress-job.yaml'
+        CRON_JOB_PATH = 'build/k8s/cypress-cron-job.yaml' 
         DOCKERHUB_CREDENTIALS = 'dockerhub-credentials'
         KUBERNETES_CREDENTIALS = 'docker-desktop-kubeconfig'
     }
