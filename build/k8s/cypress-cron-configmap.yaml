@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cypress-env
+  name: cypress-cron-env
   namespace: cypress-automation
 data:
   DISPLAY: ':99'

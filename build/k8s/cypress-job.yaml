@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: cypress-automation-debug
+  name: cypress-automation-chrome
   namespace: cypress-automation
 spec:
   template:
@@ -11,19 +11,19 @@ spec:
     spec:
       containers:
       - name: cypress-e2e-tests-chrome
-        image: adriandez/cypress-automation:latest
+        image: adriandez/cypress-automation:chrome
         command: ["/bin/bash", "-c"]
         args: ["/usr/local/bin/run-tests.sh"]
+        env:
+            - name: INSTALL_BROWSER
+              value: chrome
+            - name: TEST_BROWSER
+              value: chrome
+            - name: TEST_ENV
+              value: testing
         envFrom:
         - configMapRef:
             name: cypress-env
-        resources:
-          limits:
-            memory: "4Gi"
-            cpu: "2"
-          requests:
-            memory: "2Gi"
-            cpu: "1"
         securityContext:
           privileged: true
       restartPolicy: Never

@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE_BASE = 'adriandez/cypress-automation'
         CONFIGMAP_PATH = 'build/k8s/cypress-configmap.yaml'
+        CONFIGMAP_PATH_CRON = 'build/k8s/cypress-cron-configmap.yaml'
         JOB_PATH = 'build/k8s/cypress-job.yaml'
         CRON_JOB_PATH = 'build/k8s/cypress-cron-job.yaml'
         DOCKERHUB_CREDENTIALS = 'dockerhub-credentials'  
@@ -87,13 +88,14 @@ pipeline {
             steps {
                 script {
                     withCredentials([file(credentialsId: KUBERNETES_CREDENTIALS, variable: 'KUBECONFIG')]) {
+                        bat "kubectl apply -f ${CONFIGMAP_PATH_CRON} --kubeconfig=%KUBECONFIG%"
                         bat "kubectl apply -f ${CRON_JOB_PATH} --kubeconfig=%KUBECONFIG%"
                     }
                 }
             }
         }
     } 
-    
+
     post {
         success {
             echo 'Pipeline completed successfully'

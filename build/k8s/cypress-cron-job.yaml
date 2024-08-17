@@ -4,7 +4,7 @@ metadata:
   name: cypress-automation-cron
   namespace: cypress-automation
 spec:
-  schedule: "0 6 * * *"  # This will run every day at 6:00 AM
+  schedule: "0 6 * * *"
   jobTemplate:
     spec:
       template:
@@ -22,7 +22,9 @@ spec:
               value: testing
             envFrom:
             - configMapRef:
-                name: cypress-env
+                name: cypress-cron-env
+            securityContext:
+              privileged: true
           - name: cypress-automation-edge
             image: cypress-automation:edge
             imagePullPolicy: "Always"
@@ -35,7 +37,9 @@ spec:
               value: testing
             envFrom:
             - configMapRef:
-                name: cypress-env
+                name: cypress-cron-env
+            securityContext:
+              privileged: true
           - name: cypress-automation-firefox
             image: cypress-automation:firefox
             imagePullPolicy: "Always"
@@ -48,11 +52,11 @@ spec:
               value: testing
             envFrom:
             - configMapRef:
-                name: cypress-env
+                name: cypress-cron-env
+            securityContext:
+              privileged: true
           imagePullSecrets:
           - name: regcred
           restartPolicy: Never
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 1
-
-
