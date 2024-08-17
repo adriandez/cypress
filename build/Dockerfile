@@ -15,8 +15,8 @@ COPY build/install-headless-dependencies.sh /usr/local/bin/install-headless-depe
 RUN chmod +x /usr/local/bin/install-headless-dependencies.sh && \
     /bin/bash /usr/local/bin/install-headless-dependencies.sh
 
-# Copy package.json and install project dependencies
-COPY package.json ./
+# Copy package.json and package-lock.json and install project dependencies
+COPY package.json package-lock.json ./
 RUN npm install -g npm@latest && npm ci
 
 # Set environment variables
