@@ -21,7 +21,11 @@ pkill -f Xvfb || true
 # Start Xvfb
 echo "Starting Xvfb..."
 Xvfb :99 -screen 0 1920x1080x24 &
+export DISPLAY=:99
 echo "Xvfb started."
+
+# Wait for Xvfb to start
+sleep 5
 
 # Run the tests
 echo "Running Cypress tests..."
