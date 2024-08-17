@@ -5,7 +5,7 @@ pipeline {
         DOCKER_IMAGE_BASE = 'adriandez/cypress-automation'
         CONFIGMAP_PATH = 'build/k8s/cypress-configmap.yaml'
         CONFIGMAP_PATH_CRON = 'build/k8s/cypress-cron-configmap.yaml'
-        JOB_TEMPLATE_PATH = 'build/k8s/cypress-job-template.yaml'
+        JOB_TEMPLATE_PATH = 'build/k8s/cypress-job.yaml'
         DOCKERHUB_CREDENTIALS = 'dockerhub-credentials'
         KUBERNETES_CREDENTIALS = 'docker-desktop-kubeconfig'
     }
