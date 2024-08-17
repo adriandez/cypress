@@ -80,7 +80,7 @@ pipeline {
             steps {
                 script {
                     def jobYaml = readFile(JOB_TEMPLATE_PATH)
-                    jobYaml = jobYaml.replaceAll("{{BROWSER}}", params.BROWSER)
+                    jobYaml = jobYaml.replace("{{BROWSER}}", params.BROWSER)
                     
                     def tempYamlPath = "build/k8s/cypress-job-${params.BROWSER}.yaml"
                     writeFile file: tempYamlPath, text: jobYaml
