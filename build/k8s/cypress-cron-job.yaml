@@ -4,28 +4,55 @@ metadata:
   name: cypress-automation-cron
   namespace: cypress-automation
 spec:
-  schedule: "*/5 * * * *"  # This will run every 5 minutes
+  schedule: "0 6 * * *"  # This will run every day at 6:00 AM
   jobTemplate:
     spec:
       template:
         spec:
           containers:
-          - name: cypress-e2e-tests-chrome
-            image: adriandez/cypress-automation:latest
-            command: ["/bin/bash", "-c"]
-            args: ["/usr/local/bin/run-tests.sh"]
+          - name: cypress-automation-chrome
+            image: cypress-automation:chrome
+            imagePullPolicy: "Always"
+            env:
+            - name: INSTALL_BROWSER
+              value: chrome
+            - name: TEST_BROWSER
+              value: chrome
+            - name: TEST_ENV
+              value: testing
             envFrom:
             - configMapRef:
                 name: cypress-env
-            resources:
-              limits:
-                memory: "4Gi"
-                cpu: "2"
-              requests:
-                memory: "2Gi"
-                cpu: "1"
-            securityContext:
-              privileged: true
+          - name: cypress-automation-edge
+            image: cypress-automation:edge
+            imagePullPolicy: "Always"
+            env:
+            - name: INSTALL_BROWSER
+              value: edge
+            - name: TEST_BROWSER
+              value: edge
+            - name: TEST_ENV
+              value: testing
+            envFrom:
+            - configMapRef:
+                name: cypress-env
+          - name: cypress-automation-firefox
+            image: cypress-automation:firefox
+            imagePullPolicy: "Always"
+            env:
+            - name: INSTALL_BROWSER
+              value: firefox
+            - name: TEST_BROWSER
+              value: firefox
+            - name: TEST_ENV
+              value: testing
+            envFrom:
+            - configMapRef:
+                name: cypress-env
+          imagePullSecrets:
+          - name: regcred
           restartPolicy: Never
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 1
+
+

@@ -1,68 +1,67 @@
 # Base image
-FROM node:20.16.0
+FROM node:20.16.0 AS base
 
 # Set the working directory
 WORKDIR /app
 
-# Copy the headless dependencies installation script
+# Install bash, debugging tools, and headless dependencies
+RUN apt-get update && apt-get install -y bash procps && \
+    chmod 1777 /tmp /var/tmp /dev/shm && \
+    mkdir -p /usr/local/bin && \
+    chmod 755 /usr/local/bin
+
+# Copy and install headless dependencies
 COPY build/install-headless-dependencies.sh /usr/local/bin/install-headless-dependencies.sh
-
-# Add debugging to check if the script is present and list environment variables
-RUN ls -al /usr/local/bin/ && \
-    ls -al /app/ && \
-    env && \
-    pwd
-
-# Make the script executable and run it
 RUN chmod +x /usr/local/bin/install-headless-dependencies.sh && \
     /bin/bash /usr/local/bin/install-headless-dependencies.sh
 
-# Install bash and debugging tools
-RUN apt-get update && apt-get install -y bash procps
+# Copy package.json and install project dependencies
+COPY package.json ./
+RUN npm install -g npm@latest && npm ci
 
-# Set the INSTALL_BROWSER argument and environment variable
+# Set environment variables
+ENV DISPLAY=:99 \
+    TERM=xterm \
+    XDG_RUNTIME_DIR=/tmp
+
+# Copy custom scripts and make them executable
+COPY build/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY build/verify-cypress.sh /usr/local/bin/verify-cypress.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh /usr/local/bin/verify-cypress.sh
+
+# Set docker-entrypoint.sh as the entrypoint
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+
+# Copy the rest of the project files
+COPY . .
+
+# Copy the test script and make it executable
+COPY build/run-tests.sh /usr/local/bin/run-tests.sh
+RUN chmod +x /usr/local/bin/run-tests.sh
+
+# Stage for browser installation
+FROM base as browser-install
+
+# Use an ARG to determine which browser to install
+ARG INSTALL_BROWSER
+ENV INSTALL_BROWSER=${INSTALL_BROWSER}
+
+# Install the selected browser
+COPY build/install-browser.sh /usr/local/bin/install-browser.sh
+RUN chmod +x /usr/local/bin/install-browser.sh && /usr/local/bin/install-browser.sh
+
+# Set default command to run tests
+CMD ["/usr/local/bin/run-tests.sh"]
+
+# Specific stages for Chrome, Firefox, and Edge
+FROM browser-install as chrome
 ARG INSTALL_BROWSER=chrome
 ENV INSTALL_BROWSER=${INSTALL_BROWSER}
 
-# Copy the browser installation script into the Docker image and execute it
-COPY build/install-browser.sh /usr/local/bin/install-browser.sh
+FROM browser-install as firefox
+ARG INSTALL_BROWSER=firefox
+ENV INSTALL_BROWSER=${INSTALL_BROWSER}
 
-# Debugging: List files in /usr/local/bin/
-RUN ls -la /usr/local/bin/
-
-RUN chmod +x /usr/local/bin/install-browser.sh && /usr/local/bin/install-browser.sh
-
-# Copy package.json and package-lock.json into the Docker image
-COPY package.json package-lock.json ./
-
-# Update npm to the latest version
-RUN npm install -g npm@latest
-
-# Install project dependencies, including Cypress
-RUN npm ci
-
-# Set environment variables
-ENV DISPLAY=:99
-ENV TERM=xterm
-ENV XDG_RUNTIME_DIR=/tmp
-
-# Set correct permissions for /tmp, /var/tmp, and /dev/shm
-RUN chmod 1777 /tmp /var/tmp /dev/shm
-
-# Copy the script
-COPY build/run-tests.sh /usr/local/bin/run-tests.sh
-
-# Add a debug step to list files in /usr/local/bin/ before running chmod
-RUN ls -l /usr/local/bin/ && chmod +x /usr/local/bin/run-tests.sh
-
-# Add another debug step to verify permissions after chmod
-RUN ls -l /usr/local/bin/
-
-# Copy the rest of your project files into the Docker image
-COPY . .
-
-# Debugging step to verify that files are copied
-RUN ls -la /app/
-
-# Default command to run when starting the container
-CMD ["/usr/local/bin/run-tests.sh"]
+FROM browser-install as edge
+ARG INSTALL_BROWSER=edge
+ENV INSTALL_BROWSER=${INSTALL_BROWSER}

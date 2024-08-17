@@ -2,10 +2,25 @@ pipeline {
     agent any
     
     environment {
-        DOCKER_IMAGE = 'adriandez/cypress-automation:latest'
+        DOCKER_IMAGE_BASE = 'adriandez/cypress-automation'
         CONFIGMAP_PATH = 'build/k8s/cypress-configmap.yaml'
         JOB_PATH = 'build/k8s/cypress-job.yaml'
         CRON_JOB_PATH = 'build/k8s/cypress-cron-job.yaml'
+        DOCKERHUB_CREDENTIALS = 'dockerhub-credentials'  
+        KUBERNETES_CREDENTIALS = 'kubernetes-credentials-id'  
+    }
+
+    parameters {
+        choice(
+            choices: ['develop', 'master'],
+            name: 'BRANCH',
+            description: 'Branch to build'
+        )
+        choice(
+            choices: ['chrome', 'edge', 'firefox'],
+            name: 'BROWSER',  
+            description: 'Browser to use'
+        )
     }
     
     stages {
@@ -13,7 +28,7 @@ pipeline {
             steps {
                 checkout([
                     $class: 'GitSCM',
-                    branches: [[name: '*/master']],
+                    branches: [[name: ' ${params.BRANCH}']],
                     userRemoteConfigs: [[
                         credentialsId: 'win-adri-id',
                         url: 'https://github.com/adriandez/cypress-automation.git'
@@ -22,34 +37,55 @@ pipeline {
             }
         }
         
-        stage('Build Docker Image') {
+        stage('Build and Push Base Docker Image') {
             steps {
                 script {
-                    bat "docker build --no-cache -t ${DOCKER_IMAGE} -f build/Dockerfile ."
-                }
-            }
-        }
-        
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    def dockerImage = "adriandez/cypress-automation:latest"
-
-                    withDockerRegistry([credentialsId: 'dockerhub-credentials', url: 'https://index.docker.io/v1/']) {
-                        bat "docker push ${dockerImage}"
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
+                        def baseImage = docker.build("${DOCKER_IMAGE_BASE}:latest", "-f build/Dockerfile .")
+                        baseImage.push()
                     }
                 }
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Build and Push Browser-Specific Docker Image') {
             steps {
                 script {
-                    // Assuming you have your kubeconfig stored as a Jenkins credential
-                    withCredentials([file(credentialsId: 'docker-desktop-kubeconfig', variable: 'KUBECONFIG')]) {
-                        bat "kubectl apply -f ${CONFIGMAP_PATH} --kubeconfig=%KUBECONFIG%"
-                        bat "kubectl apply -f ${JOB_PATH} --kubeconfig=%KUBECONFIG%"
-                        bat "kubectl apply -f ${CRON_JOB_PATH} --kubeconfig=%KUBECONFIG%"
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
+                        def browserImage = docker.build("${DOCKER_IMAGE_BASE}:${params.BROWSER}",
+                            "--build-arg INSTALL_BROWSER=${params.BROWSER} -f build/Dockerfile .")
+                        
+                        sh "docker inspect ${DOCKER_IMAGE_BASE}:${params.BROWSER} | grep INSTALL_BROWSER"
+                        browserImage.push()
+                    }
+                }
+            }
+        }
+
+        stage('Clean Up Docker Images') {
+            steps {
+                script {
+                    sh "docker rmi \$(docker images | grep 'cypress-automation' | awk '{print \$3}') --force || echo 'No old images to remove'"
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes Job') {
+            steps {
+                script {
+                    withCredentials([file(credentialsId: KUBERNETES_CREDENTIALS, variable: 'KUBECONFIG')]) {
+                        sh "kubectl apply -f ${CONFIGMAP_PATH} --kubeconfig=\${KUBECONFIG}"
+                        sh "kubectl apply -f ${JOB_PATH} --kubeconfig=\${KUBECONFIG}"
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes Cron Job') {
+            steps {
+                script {
+                    withCredentials([file(credentialsId: KUBERNETES_CREDENTIALS, variable: 'KUBECONFIG')]) {
+                        sh "kubectl apply -f ${CRON_JOB_PATH} --kubeconfig=\${KUBECONFIG}"
                     }
                 }
             }
@@ -64,4 +100,4 @@ pipeline {
             echo 'Pipeline failed'
         }
     }
-} 
+}
