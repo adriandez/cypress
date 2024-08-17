@@ -6,9 +6,9 @@ pipeline {
         CONFIGMAP_PATH = 'build/k8s/cypress-configmap.yaml'
         CONFIGMAP_PATH_CRON = 'build/k8s/cypress-cron-configmap.yaml'
         JOB_PATH = 'build/k8s/cypress-job.yaml'
-        CRON_JOB_PATH = 'build/k8s/cypress-cron-job.yaml'
-        DOCKERHUB_CREDENTIALS = 'dockerhub-credentials'  
-        KUBERNETES_CREDENTIALS = 'docker-desktop-kubeconfig'  
+        CRON_JOB_PATH = 'build/k8s/cypress-cron-job.yaml' 
+        DOCKERHUB_CREDENTIALS = 'dockerhub-credentials'
+        KUBERNETES_CREDENTIALS = 'docker-desktop-kubeconfig'
     }
 
     parameters {
@@ -19,11 +19,11 @@ pipeline {
         )
         choice(
             choices: ['chrome', 'edge', 'firefox'],
-            name: 'BROWSER',  
+            name: 'BROWSER',
             description: 'Browser to use'
         )
     }
-    
+
     stages {
         stage('Checkout Code') {
             steps {
@@ -38,26 +38,32 @@ pipeline {
             }
         }
         
-        stage('Build and Push Base Docker Image') {
+        stage("Build and Push Docker Images") {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
-                        def baseImage = docker.build("${DOCKER_IMAGE_BASE}:latest", "-f build/Dockerfile .")
-                        baseImage.push()
-                    }
-                }
-            }
-        }
+                    try {
+                        docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
 
-        stage('Build and Push Browser-Specific Docker Image') {
-            steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
-                        def browserImage = docker.build("${DOCKER_IMAGE_BASE}:${params.BROWSER}",
-                            "--build-arg INSTALL_BROWSER=${params.BROWSER} -f build/Dockerfile .")
-                        
-                        bat "docker inspect ${DOCKER_IMAGE_BASE}:${params.BROWSER} | findstr INSTALL_BROWSER"
-                        browserImage.push()
+                            def baseImage = docker.build("${DOCKER_IMAGE_BASE}:latest", "-f build/Dockerfile .")
+                            baseImage.push()
+
+                            def chromeImage = docker.build("${DOCKER_IMAGE_BASE}:chrome",
+                                "--build-arg INSTALL_BROWSER=chrome -f build/Dockerfile .")
+                            bat "docker inspect ${DOCKER_IMAGE_BASE}:chrome | findstr INSTALL_BROWSER"
+                            chromeImage.push()
+
+                            def firefoxImage = docker.build("${DOCKER_IMAGE_BASE}:firefox",
+                                "--build-arg INSTALL_BROWSER=firefox -f build/Dockerfile .")
+                            bat "docker inspect ${DOCKER_IMAGE_BASE}:firefox | findstr INSTALL_BROWSER"
+                            firefoxImage.push()
+
+                            def edgeImage = docker.build("${DOCKER_IMAGE_BASE}:edge",
+                                "--build-arg INSTALL_BROWSER=edge -f build/Dockerfile .")
+                            bat "docker inspect ${DOCKER_IMAGE_BASE}:edge | findstr INSTALL_BROWSER"
+                            edgeImage.push()
+                        }
+                    } catch (e) {
+                        error "Failed to build and push Docker images: ${e}"
                     }
                 }
             }
@@ -73,7 +79,9 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes Job') {
+    }
+
+    stage('Deploy to Kubernetes Job') {
             steps {
                 script {
                     withCredentials([file(credentialsId: KUBERNETES_CREDENTIALS, variable: 'KUBECONFIG')]) {
