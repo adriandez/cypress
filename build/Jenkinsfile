@@ -5,8 +5,7 @@ pipeline {
         DOCKER_IMAGE_BASE = 'adriandez/cypress-automation'
         CONFIGMAP_PATH = 'build/k8s/cypress-configmap.yaml'
         CONFIGMAP_PATH_CRON = 'build/k8s/cypress-cron-configmap.yaml'
-        JOB_PATH = 'build/k8s/cypress-job.yaml'
-        CRON_JOB_PATH = 'build/k8s/cypress-cron-job.yaml' 
+        JOB_TEMPLATE_PATH = 'build/k8s/cypress-job-template.yaml'
         DOCKERHUB_CREDENTIALS = 'dockerhub-credentials'
         KUBERNETES_CREDENTIALS = 'docker-desktop-kubeconfig'
     }
@@ -21,6 +20,11 @@ pipeline {
             choices: ['chrome', 'edge', 'firefox'],
             name: 'BROWSER',
             description: 'Browser to use'
+        )
+        booleanParam(
+            name: 'LAUNCH_MANUAL',
+            defaultValue: false,
+            description: 'Launch k8s job manually'
         )
     }
 
@@ -47,20 +51,10 @@ pipeline {
                             def baseImage = docker.build("${DOCKER_IMAGE_BASE}:latest", "-f build/Dockerfile .")
                             baseImage.push()
 
-                            def chromeImage = docker.build("${DOCKER_IMAGE_BASE}:chrome",
-                                "--build-arg INSTALL_BROWSER=chrome -f build/Dockerfile .")
-                            bat "docker inspect ${DOCKER_IMAGE_BASE}:chrome | findstr INSTALL_BROWSER"
-                            chromeImage.push()
-
-                            def firefoxImage = docker.build("${DOCKER_IMAGE_BASE}:firefox",
-                                "--build-arg INSTALL_BROWSER=firefox -f build/Dockerfile .")
-                            bat "docker inspect ${DOCKER_IMAGE_BASE}:firefox | findstr INSTALL_BROWSER"
-                            firefoxImage.push()
-
-                            def edgeImage = docker.build("${DOCKER_IMAGE_BASE}:edge",
-                                "--build-arg INSTALL_BROWSER=edge -f build/Dockerfile .")
-                            bat "docker inspect ${DOCKER_IMAGE_BASE}:edge | findstr INSTALL_BROWSER"
-                            edgeImage.push()
+                            def browserImage = docker.build("${DOCKER_IMAGE_BASE}:${params.BROWSER}",
+                                "--build-arg INSTALL_BROWSER=${params.BROWSER} -f build/Dockerfile .")
+                            bat "docker inspect ${DOCKER_IMAGE_BASE}:${params.BROWSER} | findstr INSTALL_BROWSER"
+                            browserImage.push()
                         }
                     } catch (e) {
                         error "Failed to build and push Docker images: ${e}"
@@ -80,12 +74,23 @@ pipeline {
         }
 
         stage('Deploy to Kubernetes Job') {
+            when {
+                expression { return params.LAUNCH_MANUAL }
+            }
             steps {
                 script {
+                    def jobYaml = readFile(JOB_TEMPLATE_PATH)
+                    jobYaml = jobYaml.replaceAll("{{BROWSER}}", params.BROWSER)
+                    
+                    def tempYamlPath = "build/k8s/cypress-job-${params.BROWSER}.yaml"
+                    writeFile file: tempYamlPath, text: jobYaml
+
                     withCredentials([file(credentialsId: KUBERNETES_CREDENTIALS, variable: 'KUBECONFIG')]) {
                         bat "kubectl apply -f ${CONFIGMAP_PATH} --kubeconfig=%KUBECONFIG%"
-                        bat "kubectl apply -f ${JOB_PATH} --kubeconfig=%KUBECONFIG%"
+                        bat "kubectl apply -f ${tempYamlPath} --kubeconfig=%KUBECONFIG%"
                     }
+
+                    deleteFile tempYamlPath
                 }
             }
         }

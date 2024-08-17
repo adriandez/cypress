@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: cypress-automation-chrome
+  name: cypress-automation-{{BROWSER}}
   namespace: cypress-automation
 spec:
   template:
@@ -10,16 +10,16 @@ spec:
         app: cypress-automation
     spec:
       containers:
-      - name: cypress-e2e-tests-chrome
-        image: adriandez/cypress-automation:chrome
+      - name: cypress-e2e-tests-{{BROWSER}}
+        image: adriandez/cypress-automation:{{BROWSER}}
         imagePullPolicy: Always
         command: ["/bin/bash", "-c"]
         args: ["/usr/local/bin/run-tests.sh"]
         env:
           - name: INSTALL_BROWSER
-            value: chrome
+            value: {{BROWSER}}
           - name: TEST_BROWSER
-            value: chrome
+            value: {{BROWSER}}
           - name: TEST_ENV
             value: testing
         envFrom:
