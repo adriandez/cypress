@@ -55,7 +55,7 @@ pipeline {
                         def browserImage = docker.build("${DOCKER_IMAGE_BASE}:${params.BROWSER}",
                             "--build-arg INSTALL_BROWSER=${params.BROWSER} -f build/Dockerfile .")
                         
-                        sh "docker inspect ${DOCKER_IMAGE_BASE}:${params.BROWSER} | grep INSTALL_BROWSER"
+                        bat "docker inspect ${DOCKER_IMAGE_BASE}:${params.BROWSER} | findstr INSTALL_BROWSER"
                         browserImage.push()
                     }
                 }
@@ -65,7 +65,7 @@ pipeline {
         stage('Clean Up Docker Images') {
             steps {
                 script {
-                    sh "docker rmi \$(docker images | grep 'cypress-automation' | awk '{print \$3}') --force || echo 'No old images to remove'"
+                    bat "for /f \"tokens=3\" %i in ('docker images ^| findstr \"cypress-automation\"') do docker rmi %i --force"
                 }
             }
         }
@@ -74,8 +74,8 @@ pipeline {
             steps {
                 script {
                     withCredentials([file(credentialsId: KUBERNETES_CREDENTIALS, variable: 'KUBECONFIG')]) {
-                        sh "kubectl apply -f ${CONFIGMAP_PATH} --kubeconfig=\${KUBECONFIG}"
-                        sh "kubectl apply -f ${JOB_PATH} --kubeconfig=\${KUBECONFIG}"
+                        bat "kubectl apply -f ${CONFIGMAP_PATH} --kubeconfig=%KUBECONFIG%"
+                        bat "kubectl apply -f ${JOB_PATH} --kubeconfig=%KUBECONFIG%"
                     }
                 }
             }
@@ -85,7 +85,7 @@ pipeline {
             steps {
                 script {
                     withCredentials([file(credentialsId: KUBERNETES_CREDENTIALS, variable: 'KUBECONFIG')]) {
-                        sh "kubectl apply -f ${CRON_JOB_PATH} --kubeconfig=\${KUBECONFIG}"
+                        bat "kubectl apply -f ${CRON_JOB_PATH} --kubeconfig=%KUBECONFIG%"
                     }
                 }
             }
