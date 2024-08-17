@@ -65,7 +65,9 @@ pipeline {
         stage('Clean Up Docker Images') {
             steps {
                 script {
-                    bat "for /f \"tokens=3\" %i in ('docker images ^| findstr \"cypress-automation\"') do docker rmi %i --force"
+                    bat '''
+                        for /f "tokens=3" %%i in ('docker images ^| findstr "cypress-automation"') do docker rmi %%i --force
+                    '''
                 }
             }
         }
