@@ -89,8 +89,6 @@ pipeline {
                         bat "kubectl apply -f ${CONFIGMAP_PATH} --kubeconfig=%KUBECONFIG%"
                         bat "kubectl apply -f ${tempYamlPath} --kubeconfig=%KUBECONFIG%"
                     }
-
-                    deleteFile tempYamlPath
                 }
             }
         }
