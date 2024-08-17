@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cypress-automation-firefox
+  namespace: cypress-automation
+spec:
+  template:
+    metadata:
+      labels:
+        app: cypress-automation
+    spec:
+      containers:
+      - name: cypress-e2e-tests-firefox
+        image: adriandez/cypress-automation:firefox
+        imagePullPolicy: Always
+        command: ["/bin/bash", "-c"]
+        args: ["/usr/local/bin/run-tests.sh"]
+        env:
+          - name: INSTALL_BROWSER
+            value: firefox
+          - name: TEST_BROWSER
+            value: firefox
+          - name: TEST_ENV
+            value: testing
+          - name: ENABLE_VIDEO
+            value: 'false'
+        envFrom:
+          - configMapRef:
+              name: cypress-env
+        securityContext:
+          privileged: true
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: regcred
+  backoffLimit: 0

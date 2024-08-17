@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: cypress-automation-firefox
+  name: cypress-automation-chrome
   namespace: cypress-automation
 spec:
   template:
@@ -10,18 +10,20 @@ spec:
         app: cypress-automation
     spec:
       containers:
-      - name: cypress-e2e-tests-firefox
-        image: adriandez/cypress-automation:firefox
+      - name: cypress-e2e-tests-chrome
+        image: adriandez/cypress-automation:chrome
         imagePullPolicy: Always
         command: ["/bin/bash", "-c"]
         args: ["/usr/local/bin/run-tests.sh"]
         env:
           - name: INSTALL_BROWSER
-            value: firefox
+            value: chrome
           - name: TEST_BROWSER
-            value: firefox
+            value: chrome
           - name: TEST_ENV
             value: testing
+          - name: ENABLE_VIDEO
+            value: 'true'
         envFrom:
           - configMapRef:
               name: cypress-env

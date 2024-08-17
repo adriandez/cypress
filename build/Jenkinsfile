@@ -5,8 +5,6 @@ pipeline {
         DOCKER_IMAGE_BASE = 'adriandez/cypress-automation'
         CONFIGMAP_PATH = 'build/k8s/cypress-configmap.yaml'
         CONFIGMAP_PATH_CRON = 'build/k8s/cypress-cron-configmap.yaml'
-        JOB_PATH = 'build/k8s/cypress-job.yaml'
-        CRON_JOB_PATH = 'build/k8s/cypress-cron-job.yaml' 
         DOCKERHUB_CREDENTIALS = 'dockerhub-credentials'
         KUBERNETES_CREDENTIALS = 'docker-desktop-kubeconfig'
     }
@@ -21,6 +19,11 @@ pipeline {
             choices: ['chrome', 'edge', 'firefox'],
             name: 'BROWSER',
             description: 'Browser to use'
+        )
+        booleanParam(
+            name: 'LAUNCH_MANUAL',
+            defaultValue: true,
+            description: 'Launch manual deployment to Kubernetes'
         )
     }
 
@@ -80,22 +83,45 @@ pipeline {
         }
 
         stage('Deploy to Kubernetes Job') {
+            when {
+                expression { return params.LAUNCH_MANUAL }
+            }
             steps {
                 script {
+                    def jobPath = ''
+                    if (params.BROWSER == 'chrome') {
+                        jobPath = 'build/k8s/cypress-job-chrome.yaml'
+                    } else if (params.BROWSER == 'edge') {
+                        jobPath = 'build/k8s/cypress-job-edge.yaml'
+                    } else if (params.BROWSER == 'firefox') {
+                        jobPath = 'build/k8s/cypress-job-firefox.yaml'
+                    }
+                    
                     withCredentials([file(credentialsId: KUBERNETES_CREDENTIALS, variable: 'KUBECONFIG')]) {
                         bat "kubectl apply -f ${CONFIGMAP_PATH} --kubeconfig=%KUBECONFIG%"
-                        bat "kubectl apply -f ${JOB_PATH} --kubeconfig=%KUBECONFIG%"
+                        bat "kubectl apply -f ${jobPath} --kubeconfig=%KUBECONFIG%"
                     }
                 }
             }
         }
 
-        stage('Deploy to Kubernetes Cron Job') {
+        stage('Deploy to Kubernetes Cron Jobs') {
             steps {
                 script {
+                    def cronJobPaths = [
+                        'chrome': 'build/k8s/cypress-cron-job-chrome.yaml',
+                        'edge': 'build/k8s/cypress-cron-job-edge.yaml',
+                        'firefox': 'build/k8s/cypress-cron-job-firefox.yaml'
+                    ]
+
                     withCredentials([file(credentialsId: KUBERNETES_CREDENTIALS, variable: 'KUBECONFIG')]) {
+                        // Apply the cron job configuration map
                         bat "kubectl apply -f ${CONFIGMAP_PATH_CRON} --kubeconfig=%KUBECONFIG%"
-                        bat "kubectl apply -f ${CRON_JOB_PATH} --kubeconfig=%KUBECONFIG%"
+
+                        // Apply each cron job
+                        cronJobPaths.each { browser, cronJobPath ->
+                            bat "kubectl apply -f ${cronJobPath} --kubeconfig=%KUBECONFIG%"
+                        }
                     }
                 }
             }

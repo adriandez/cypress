@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cypress-automation-cron-firefox
+  namespace: cypress-automation
+spec:
+  schedule: "0 6 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: cypress-automation-firefox
+            image: adriandez/cypress-automation:firefox
+            imagePullPolicy: "Always"
+            env:
+              - name: INSTALL_BROWSER
+                value: firefox
+              - name: TEST_BROWSER
+                value: firefox
+              - name: TEST_ENV
+                value: testing
+              - name: ENABLE_VIDEO
+                value: 'false'
+            envFrom:
+              - configMapRef:
+                  name: cypress-cron-env
+            securityContext:
+              privileged: true
+          imagePullSecrets:
+          - name: regcred
+          restartPolicy: Never
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
