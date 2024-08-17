@@ -79,9 +79,7 @@ pipeline {
             }
         }
 
-    }
-
-    stage('Deploy to Kubernetes Job') {
+        stage('Deploy to Kubernetes Job') {
             steps {
                 script {
                     withCredentials([file(credentialsId: KUBERNETES_CREDENTIALS, variable: 'KUBECONFIG')]) {
