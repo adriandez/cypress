@@ -18,16 +18,19 @@ echo "DBus session started with address $DBUS_SESSION_BUS_ADDRESS."
 echo "Killing existing Xvfb processes (if any)..."
 pkill -f Xvfb || true
 
-# Start Xvfb
-echo "Starting Xvfb..."
-Xvfb :99 -screen 0 1920x1080x24 &
-export DISPLAY=:99
-echo "Xvfb started."
+# Check if DISPLAY variable is set, otherwise default to :99
+if [ -z "$DISPLAY" ]; then
+  export DISPLAY=:99
+fi
+
+# Start Xvfb on the specified DISPLAY
+echo "Starting Xvfb on display $DISPLAY..."
+Xvfb $DISPLAY -screen 0 1920x1080x24 &
+echo "Xvfb started on $DISPLAY."
 
 # Wait for Xvfb to start
 sleep 5
 
 # Run the tests
-echo "Running Cypress tests..."
+echo "Running Cypress tests with browser $TEST_BROWSER..."
 npm run test
-

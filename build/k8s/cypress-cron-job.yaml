@@ -20,6 +20,8 @@ spec:
                 value: chrome
               - name: TEST_ENV
                 value: testing
+              - name: DISPLAY
+                value: ':99'
             envFrom:
               - configMapRef:
                   name: cypress-cron-env
@@ -35,6 +37,8 @@ spec:
                 value: edge
               - name: TEST_ENV
                 value: testing
+              - name: DISPLAY
+                value: ':100'
             envFrom:
               - configMapRef:
                   name: cypress-cron-env
@@ -50,6 +54,8 @@ spec:
                 value: firefox
               - name: TEST_ENV
                 value: testing
+              - name: DISPLAY
+                value: ':101'
             envFrom:
               - configMapRef:
                   name: cypress-cron-env
