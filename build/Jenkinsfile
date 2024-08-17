@@ -7,7 +7,7 @@ pipeline {
         JOB_PATH = 'build/k8s/cypress-job.yaml'
         CRON_JOB_PATH = 'build/k8s/cypress-cron-job.yaml'
         DOCKERHUB_CREDENTIALS = 'dockerhub-credentials'  
-        KUBERNETES_CREDENTIALS = 'kubernetes-credentials-id'  
+        KUBERNETES_CREDENTIALS = 'docker-desktop-kubeconfig'  
     }
 
     parameters {
