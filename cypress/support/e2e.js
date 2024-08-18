@@ -34,7 +34,7 @@ afterEach(function () {
     const stepResult =
       testState.runTests[testState.currentScenario.name][testState.currentStep];
     const featureName = this.currentTest.parent.title;
-    const screenshotFileName = `${featureName} -- ${this.currentTest.title} (failed).png`;
+    const screenshotFileName = `${featureName} -- ${this.currentTest.title}.png`;
 
     if (screenshotsEnabled) {
       cy.customLog(`Searching for screenshot: ${screenshotFileName}`, {

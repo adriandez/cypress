@@ -1,11 +1,17 @@
 import { defineConfig } from 'cypress';
 import cucumberPreprocessor from 'cypress-cucumber-preprocessor';
 import { getConfig } from './get-config.js';
-import fsPromises from 'fs/promises'; // For async operations
-import fs from 'fs'; // For synchronous operations
+import fsPromises from 'fs/promises';
+import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import { format } from 'date-fns';
+import { logDirectoryStructure } from './cypress/utils/log-directory-structure.js';
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const allowedEnvironments = ['local', 'develop', 'testing', 'preproduction'];
 const logTypes = [
@@ -66,28 +72,32 @@ export default defineConfig({
         }
       });
 
-      // Task for reading file if exists
       on('task', {
-        readFileIfExists({ filePath, options = 'utf8' }) {
-          console.log(
-            `Attempting to read file at path: ${filePath} with options: ${options}`
-          ); // Added log
-          if (fs.existsSync(filePath)) {
-            console.log(`File exists. Reading now.`); // Added log
-            return fs.readFileSync(filePath, options);
-          } else {
-            console.log(`File not found at path: ${filePath}`); // Added log
-          }
-          return null; // File does not exist
-        },
-        findScreenshot({ screenshotsFolder, screenshotFileName }) {
+        async findScreenshot({ screenshotsFolder, screenshotFileName }) {
           console.log(
             `Searching for screenshot '${screenshotFileName}' in folder '${screenshotsFolder}'`
           );
-          return findScreenshotRecursively(
+
+          const screenshotPath = await findScreenshotRecursively(
             screenshotsFolder,
             screenshotFileName
           );
+
+          const logFileName = `log_${format(new Date(), 'yyyyMMdd_HHmmss')}.txt`;
+          const logFilePath = path.join(__dirname, logFileName);
+
+          if (screenshotPath) {
+            console.log(`Screenshot found at: ${screenshotPath}`);
+            return screenshotPath;
+          } else {
+            console.log(`Screenshot not found. Logging directory structure...`);
+
+            // Only log the structure of the screenshots folder recursively (full content)
+            await logDirectoryStructure(screenshotsFolder, logFilePath, true);
+
+            console.log(`Directory structure logged to: ${logFilePath}`);
+            return null;
+          }
         }
       });
 
@@ -114,10 +124,8 @@ export default defineConfig({
         process.exit(1);
       }
 
-      // Check if TEST_BROWSER is firefox and disable video accordingly
       const isFirefox = process.env.TEST_BROWSER === 'firefox';
       const enableVideo = process.env.ENABLE_VIDEO !== 'false' && !isFirefox;
-
       const enableScreenshotsFail =
         process.env.ENABLE_SCREENSHOTS_FAIL !== 'false';
 
