@@ -2,29 +2,29 @@
 set -e
 
 if [ -z "$INSTALL_BROWSER" ]; then
-    echo "No browser specified. Skipping browser installation."
+    echo "[INSTALL-BROWSER] No browser specified. Skipping browser installation."
     exit 0
 fi
 
 case "$INSTALL_BROWSER" in
     chrome)
-        echo "Preparing to install Google Chrome..."
+        echo "[INSTALL-BROWSER] Preparing to install Google Chrome"
         wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
-        echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
+        echo "[INSTALL-BROWSER] deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
         apt-get update && apt-get install -y google-chrome-stable
         ;;
     firefox)
-        echo "Preparing to install Firefox..."
+        echo "[INSTALL-BROWSER] Preparing to install Firefox"
         apt-get update && apt-get install -y firefox-esr
         ;;
     edge)
-        echo "Preparing to install Microsoft Edge..."
+        echo "[INSTALL-BROWSER] Preparing to install Microsoft Edge"
         wget -q https://packages.microsoft.com/keys/microsoft.asc -O- | apt-key add -
         echo "deb [arch=amd64] https://packages.microsoft.com/repos/edge stable main" > /etc/apt/sources.list.d/microsoft-edge.list
         apt-get update && apt-get install -y microsoft-edge-stable
         ;;
     *)
-        echo "Unsupported browser: $INSTALL_BROWSER. Exiting."
+        echo "[INSTALL-BROWSER] Unsupported browser: $INSTALL_BROWSER. Exiting."
         exit 1
         ;;
 esac
@@ -33,26 +33,26 @@ esac
 case "$INSTALL_BROWSER" in
     chrome)
         if ! command -v google-chrome &> /dev/null; then
-            echo "Google Chrome installation failed."
+            echo "[INSTALL-BROWSER] Google Chrome installation failed"
             exit 1
         else
-            echo "Google Chrome installed successfully."
+            echo "[INSTALL-BROWSER] Google Chrome installed successfully"
         fi
         ;;
     firefox)
         if ! command -v firefox &> /dev/null; then
-            echo "Firefox installation failed."
+            echo "[INSTALL-BROWSER] Firefox installation failed"
             exit 1
         else
-            echo "Firefox installed successfully."
+            echo "[INSTALL-BROWSER] Firefox installed successfully"
         fi
         ;;
     edge)
         if ! command -v microsoft-edge &> /dev/null; then
-            echo "Microsoft Edge installation failed."
+            echo "[INSTALL-BROWSER] Microsoft Edge installation failed"
             exit 1
         else
-            echo "Microsoft Edge installed successfully."
+            echo "[INSTALL-BROWSER] Microsoft Edge installed successfully"
         fi
         ;;
 esac
