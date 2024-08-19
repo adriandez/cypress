@@ -35,36 +35,35 @@ ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 # Copy the rest of the project files
 COPY . .
 
-# Specific stages for Chrome, Firefox, and Edge
-FROM browser-install as chrome
-ARG INSTALL_BROWSER=chrome
+# Stage for browser installation
+FROM base as browser-install
+
+# Use an ARG to determine which browser to install
+ARG INSTALL_BROWSER
 ENV INSTALL_BROWSER=${INSTALL_BROWSER}
 
 # Install the selected browser
 COPY build/install-browser.sh /usr/local/bin/install-browser.sh
 RUN chmod +x /usr/local/bin/install-browser.sh && /usr/local/bin/install-browser.sh
 
-# Default commant to run when starting the container
+# Specific stages for Chrome, Firefox, and Edge
+FROM browser-install as chrome
+ARG INSTALL_BROWSER=chrome
+ENV INSTALL_BROWSER=${INSTALL_BROWSER}
+
+# Default command to run when starting container
 CMD ["npm","run","test"]
 
 FROM browser-install as firefox
 ARG INSTALL_BROWSER=firefox
 ENV INSTALL_BROWSER=${INSTALL_BROWSER}
 
-# Install the selected browser
-COPY build/install-browser.sh /usr/local/bin/install-browser.sh
-RUN chmod +x /usr/local/bin/install-browser.sh && /usr/local/bin/install-browser.sh
-
-# Default commant to run when starting the container
+# Default command to run when starting container
 CMD ["npm","run","test"]
 
 FROM browser-install as edge
 ARG INSTALL_BROWSER=edge
 ENV INSTALL_BROWSER=${INSTALL_BROWSER}
 
-# Install the selected browser
-COPY build/install-browser.sh /usr/local/bin/install-browser.sh
-RUN chmod +x /usr/local/bin/install-browser.sh && /usr/local/bin/install-browser.sh
-
-# Default commant to run when starting the container
+# Default command to run when starting container
 CMD ["npm","run","test"]
