@@ -9,7 +9,7 @@ echo -e "[TEST_BROWSER]: $TEST_BROWSER\n"
 echo -e "[ENABLE_VIDEO]: $ENABLE_VIDEO\n"
 
 # Ensure bash is available (optional)
-echo -e "[BASH] Checking if bash is available\n"
+echo -e "[BASH] Checking if bash is available"
 which bash
 
 # Ensure correct permissions for /tmp
@@ -21,12 +21,12 @@ echo -e "[XDG] Unsetting XDG_RUNTIME_DIR\n"
 unset XDG_RUNTIME_DIR
 
 # Start a new DBus session
-echo -e "[DBUS] Starting new DBus session\n"
+echo -e "[DBUS] Starting new DBus session"
 eval `dbus-launch --sh-syntax`
 echo -e "[DBUS] DBus session started with address $DBUS_SESSION_BUS_ADDRESS\n"
 
 # Kill any existing Xvfb processes (use pkill as an alternative)
-echo -e "[XVFB] Killing existing Xvfb processes (if any)\n"
+echo -e "[XVFB] Killing existing Xvfb processes (if any)"
 pkill -f Xvfb || true
 
 # Check if DISPLAY variable is set, otherwise default to :99
@@ -35,7 +35,7 @@ if [ -z "$DISPLAY" ]; then
 fi
 
 # Start Xvfb on the specified DISPLAY
-echo -e "[XVFB] Starting Xvfb on display $DISPLAY\n"
+echo -e "[XVFB] Starting Xvfb on display $DISPLAY"
 Xvfb $DISPLAY -screen 0 1920x1080x24 &
 echo -e "[XVFB] Xvfb started on $DISPLAY\n"
 
