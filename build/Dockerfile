@@ -16,7 +16,7 @@ RUN chmod +x /usr/local/bin/install-headless-dependencies.sh && \
     /bin/bash /usr/local/bin/install-headless-dependencies.sh
 
 # Copy package.json and package-lock.json and install project dependencies
-COPY package.json package-lock.json ./
+COPY package*.json ./
 RUN npm install -g npm@latest && npm ci
 
 # Set environment variables
@@ -35,33 +35,36 @@ ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 # Copy the rest of the project files
 COPY . .
 
-# Copy the test script and make it executable
-COPY build/run-tests.sh /usr/local/bin/run-tests.sh
-RUN chmod +x /usr/local/bin/run-tests.sh
-
-# Stage for browser installation
-FROM base as browser-install
-
-# Use an ARG to determine which browser to install
-ARG INSTALL_BROWSER
+# Specific stages for Chrome, Firefox, and Edge
+FROM browser-install as chrome
+ARG INSTALL_BROWSER=chrome
 ENV INSTALL_BROWSER=${INSTALL_BROWSER}
 
 # Install the selected browser
 COPY build/install-browser.sh /usr/local/bin/install-browser.sh
 RUN chmod +x /usr/local/bin/install-browser.sh && /usr/local/bin/install-browser.sh
 
-# Set default command to run tests
-CMD ["/usr/local/bin/run-tests.sh"]
-
-# Specific stages for Chrome, Firefox, and Edge
-FROM browser-install as chrome
-ARG INSTALL_BROWSER=chrome
-ENV INSTALL_BROWSER=${INSTALL_BROWSER}
+# Default commant to run when starting the container
+CMD ["npm","run","test"]
 
 FROM browser-install as firefox
 ARG INSTALL_BROWSER=firefox
 ENV INSTALL_BROWSER=${INSTALL_BROWSER}
 
+# Install the selected browser
+COPY build/install-browser.sh /usr/local/bin/install-browser.sh
+RUN chmod +x /usr/local/bin/install-browser.sh && /usr/local/bin/install-browser.sh
+
+# Default commant to run when starting the container
+CMD ["npm","run","test"]
+
 FROM browser-install as edge
 ARG INSTALL_BROWSER=edge
 ENV INSTALL_BROWSER=${INSTALL_BROWSER}
+
+# Install the selected browser
+COPY build/install-browser.sh /usr/local/bin/install-browser.sh
+RUN chmod +x /usr/local/bin/install-browser.sh && /usr/local/bin/install-browser.sh
+
+# Default commant to run when starting the container
+CMD ["npm","run","test"]
