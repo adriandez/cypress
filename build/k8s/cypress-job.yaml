@@ -13,8 +13,6 @@ spec:
       - name: cypress-e2e-tests-{{BROWSER}}
         image: adriandez/cypress-automation:{{BROWSER}}
         imagePullPolicy: Always
-        command: ["/bin/bash", "-c"]
-        args: ["/usr/local/bin/run-tests.sh"]
         env:
           - name: INSTALL_BROWSER
             value: {{BROWSER}}
