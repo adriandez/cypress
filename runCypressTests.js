@@ -47,7 +47,9 @@ if (FOCUS === 'true') {
   cypressArgs.push(`TAGS=@${tagName}`);
 }
 
-console.log(`Executing: ${cypressCommand} ${cypressArgs.join(' ')}`);
+console.log(
+  `[RUN-CYPRESS-TESTS] Executing: ${cypressCommand} ${cypressArgs.join(' ')}`
+);
 
 const child = spawn(cypressCommand, cypressArgs, {
   stdio: 'inherit',

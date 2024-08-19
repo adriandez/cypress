@@ -25,7 +25,7 @@ const directories = argv.reset
 
 const deleteDirectoryContents = async (directory) => {
   if (await fs.stat(directory).catch(() => false)) {
-    console.log(`Directory exists, deleting contents: ${directory}`);
+    console.log(`[REST] Directory exists, deleting contents: ${directory}`);
     const files = await fs.readdir(directory);
     await Promise.all(
       files.map(async (file) => {
@@ -33,32 +33,31 @@ const deleteDirectoryContents = async (directory) => {
         const stat = await fs.lstat(curPath);
         if (stat.isDirectory()) {
           console.log(
-            `Entering and deleting contents of directory: ${curPath}`
+            `[REST] Entering and deleting contents of directory: ${curPath}`
           );
           await deleteDirectoryContents(curPath);
-          console.log(`Removing directory: ${curPath}`);
+          console.log(`[REST] Removing directory: ${curPath}`);
           await fs.rmdir(curPath);
         } else {
-          console.log(`Deleting file: ${curPath}`);
+          console.log(`[REST] Deleting file: ${curPath}`);
           await fs.unlink(curPath);
         }
       })
     );
   } else {
-    console.log(`Directory does not exist, skipping: ${directory}`);
+    console.log(`[REST] Directory does not exist, skipping: ${directory}`);
   }
 };
 
 const setupDirectories = async () => {
   try {
     for (const directory of directories) {
-      console.log(`--> Reset Directory <--`);
-      console.log(`Starting to clean directory: ${directory}`);
+      console.log(`[REST] Starting to clean directory: ${directory}`);
       await deleteDirectoryContents(directory);
-      console.log(`Contents deleted for directory: ${directory}`);
+      console.log(`[REST] Contents deleted for directory: ${directory}`);
     }
   } catch (error) {
-    console.error('Error setting up directories:', error);
+    console.error('[REST] Error setting up directories:', error);
   }
 };
 
