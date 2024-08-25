@@ -7,6 +7,7 @@ echo -e "[VIEWPORT_WIDTH]: $VIEWPORT_WIDTH\n"
 echo -e "[VIEWPORT_HEIGHT]: $VIEWPORT_HEIGHT\n"
 echo -e "[TEST_BROWSER]: $TEST_BROWSER\n"
 echo -e "[ENABLE_VIDEO]: $ENABLE_VIDEO\n"
+echo -e "[CHECK_ALL_CONTAINERS_COMPLETE]: $CHECK_ALL_CONTAINERS_COMPLETE\n"
 
 # Ensure bash is available (optional)
 echo -e "[BASH] Checking if bash is available"

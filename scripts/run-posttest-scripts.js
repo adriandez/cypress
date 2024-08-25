@@ -34,5 +34,6 @@ if (process.env.IMPORT_MULTIPART_RESULTS_CLOUD === 'true') {
 }
 
 if (process.env.CHECK_ALL_CONTAINERS_COMPLETE === 'true') {
+  console.log('Running: scripts/run-posttest-scripts.js');
   runScript('scripts/check-all-containers-complete.js');
 }

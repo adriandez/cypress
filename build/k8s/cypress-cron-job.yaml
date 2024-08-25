@@ -25,8 +25,8 @@ spec:
                 value: testing
               - name: DISPLAY
                 value: ':99'
-              - name: CONTAINER_NAME
-                value: "chrome"
+              - name: CHECK_ALL_CONTAINERS_COMPLETE
+                value: 'true'
             envFrom:
               - configMapRef:
                   name: cypress-cron-env
@@ -47,8 +47,8 @@ spec:
                 value: testing
               - name: DISPLAY
                 value: ':100'
-              - name: CONTAINER_NAME
-                value: "edge"
+              - name: CHECK_ALL_CONTAINERS_COMPLETE
+                value: 'true'
             envFrom:
               - configMapRef:
                   name: cypress-cron-env
@@ -69,8 +69,8 @@ spec:
                 value: testing
               - name: DISPLAY
                 value: ':101'
-              - name: CONTAINER_NAME
-                value: "firefox"
+              - name: CHECK_ALL_CONTAINERS_COMPLETE
+                value: 'true'
             envFrom:
               - configMapRef:
                   name: cypress-cron-env
