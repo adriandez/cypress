@@ -9,6 +9,9 @@ spec:
     spec:
       template:
         spec:
+          volumes:
+            - name: shared-data
+              emptyDir: {}
           containers:
           - name: cypress-automation-chrome
             image: adriandez/cypress-automation:chrome
@@ -22,9 +25,14 @@ spec:
                 value: testing
               - name: DISPLAY
                 value: ':99'
+              - name: CONTAINER_NAME
+                value: "chrome"
             envFrom:
               - configMapRef:
                   name: cypress-cron-env
+            volumeMounts:
+              - mountPath: /var/shared
+                name: shared-data
             securityContext:
               privileged: true
           - name: cypress-automation-edge
@@ -39,9 +47,14 @@ spec:
                 value: testing
               - name: DISPLAY
                 value: ':100'
+              - name: CONTAINER_NAME
+                value: "edge"
             envFrom:
               - configMapRef:
                   name: cypress-cron-env
+            volumeMounts:
+              - mountPath: /var/shared
+                name: shared-data
             securityContext:
               privileged: true
           - name: cypress-automation-firefox
@@ -56,9 +69,14 @@ spec:
                 value: testing
               - name: DISPLAY
                 value: ':101'
+              - name: CONTAINER_NAME
+                value: "firefox"
             envFrom:
               - configMapRef:
                   name: cypress-cron-env
+            volumeMounts:
+              - mountPath: /var/shared
+                name: shared-data
             securityContext:
               privileged: true
           imagePullSecrets:

@@ -30,3 +30,7 @@ if (process.env.IMPORT_PREPARE_INFO_RESULT_CLOUD === 'true') {
 if (process.env.IMPORT_MULTIPART_RESULTS_CLOUD === 'true') {
   runScript('scripts/xray-integration/import-multipart-results-cloud.js');
 }
+
+if (process.env.CHECK_ALL_CONTAINERS_COMPLETE === 'true') {
+  runScript('scripts/check-all-containers-complete.js');
+}

@@ -13,14 +13,14 @@ pipeline {
 
     parameters {
         choice(
-            choices: ['develop', 'master'],
-            name: 'BRANCH',
-            description: 'Branch to build'
-        )
-        choice(
             choices: ['chrome', 'edge', 'firefox'],
             name: 'BROWSER',
             description: 'Browser to use'
+        )
+        string(
+            name: 'BRANCH',
+            defaultValue: 'develop',
+            description: 'Branch to build'
         )
         booleanParam(
             name: 'LAUNCH_MANUAL',
