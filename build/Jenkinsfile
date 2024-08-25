@@ -9,10 +9,14 @@ pipeline {
         CRON_JOB_PATH = 'build/k8s/cypress-cron-job.yaml' 
         DOCKERHUB_CREDENTIALS = 'dockerhub-credentials'
         KUBERNETES_CREDENTIALS = 'docker-desktop-kubeconfig'
-        BROWSERS = ['chrome', 'edge', 'firefox']
     }
 
     parameters {
+        choice(
+            choices: ['chrome', 'edge', 'firefox'],
+            name: 'BROWSER',
+            description: 'Browser to use'
+        )
         string(
             name: 'BRANCH',
             defaultValue: 'develop',
@@ -42,12 +46,17 @@ pipeline {
         stage("Build and Push Docker Images") {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
-                        BROWSERS.each { browser ->
-                            def browserImage = docker.build("${DOCKER_IMAGE_BASE}:${browser}",
-                                "--build-arg INSTALL_BROWSER=${browser} -f build/Dockerfile . --no-cache")
-                            browserImage.push()
+                    try {
+                        docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
+                            ['chrome', 'edge', 'firefox'].each { browser ->
+                                def browserImage = docker.build("${DOCKER_IMAGE_BASE}:${browser}", 
+                                    "--build-arg INSTALL_BROWSER=${browser} -f build/Dockerfile .")
+                                bat "docker inspect ${DOCKER_IMAGE_BASE}:${browser} | findstr INSTALL_BROWSER"
+                                browserImage.push()
+                            }
                         }
+                    } catch (e) {
+                        error "Failed to build and push Docker images: ${e}"
                     }
                 }
             }
@@ -70,14 +79,14 @@ pipeline {
             steps {
                 script {
                     def jobYaml = readFile(JOB_TEMPLATE_PATH)
-                    BROWSERS.each { browser ->
-                        def tempYamlPath = "build/k8s/cypress-job-${browser}.yaml"
-                        def browserYaml = jobYaml.replace("{{BROWSER}}", browser)
-                        writeFile file: tempYamlPath, text: browserYaml
-                        withCredentials([file(credentialsId: KUBERNETES_CREDENTIALS, variable: 'KUBECONFIG')]) {
-                            bat "kubectl apply -f ${CONFIGMAP_PATH} --kubeconfig=%KUBECONFIG%"
-                            bat "kubectl apply -f ${tempYamlPath} --kubeconfig=%KUBECONFIG%"
-                        }
+                    jobYaml = jobYaml.replace("{{BROWSER}}", params.BROWSER)
+                    
+                    def tempYamlPath = "build/k8s/cypress-job-${params.BROWSER}.yaml"
+                    writeFile file: tempYamlPath, text: jobYaml
+
+                    withCredentials([file(credentialsId: KUBERNETES_CREDENTIALS, variable: 'KUBECONFIG')]) {
+                        bat "kubectl apply -f ${CONFIGMAP_PATH} --kubeconfig=%KUBECONFIG%"
+                        bat "kubectl apply -f ${tempYamlPath} --kubeconfig=%KUBECONFIG%"
                     }
                 }
             }
