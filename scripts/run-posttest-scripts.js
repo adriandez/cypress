@@ -5,14 +5,16 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-function runScript(scriptPath) {
+// Function to run a script synchronously
+const runScript = (scriptPath) => {
   try {
     execSync(`node ${scriptPath}`, { stdio: 'inherit' });
   } catch (error) {
     console.error(`Error executing script: ${scriptPath}`, error);
   }
-}
+};
 
+// Conditionally run scripts based on environment variables
 if (process.env.GENERATE_REPORT === 'true') {
   runScript('generate-report.js');
 }

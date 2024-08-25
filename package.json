@@ -10,7 +10,7 @@
     "initFeatures": "node scripts/xray-integration/export-features-cloud.js && node scripts/cypress-test-orchestrator/initializeFeatureAssets.js",
     "clearReports": "node reset-directory.js --reset cypress/reports",
     "pretest": "node scripts/run-pretest-scripts.js",
-    "test": "node runCypressTests.js || exit 0",
+    "test": "node runCypressTests.js",
     "posttest": "node scripts/run-posttest-scripts.js",
     "lint-fix": "eslint . --fix",
     "lint": "eslint .",

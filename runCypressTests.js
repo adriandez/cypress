@@ -15,7 +15,6 @@ const {
 const featureName = FEATURE || '*';
 const tagName = TAG || 'focus';
 
-// Simple validation/sanitization. Add more rules as needed.
 const isSafe = (str) => /^[\w-]+$/.test(str);
 
 if (
@@ -27,7 +26,6 @@ if (
   process.exit(1);
 }
 
-// Construct the Cypress command using environment variables
 const cypressCommand = 'npx';
 let cypressArgs = [
   'cypress',
@@ -41,7 +39,6 @@ let cypressArgs = [
   `TEST_ENV=${TEST_ENV},VIEWPORT_WIDTH=${VIEWPORT_WIDTH},VIEWPORT_HEIGHT=${VIEWPORT_HEIGHT}`
 ];
 
-// Conditionally add a tag if FOCUS is true
 if (FOCUS === 'true') {
   cypressArgs.push('--env');
   cypressArgs.push(`TAGS=@${tagName}`);
@@ -62,5 +59,10 @@ child.on('error', (error) => {
 
 child.on('close', (code) => {
   console.log(`Child process exited with code ${code}`);
-  process.exit(code);
+  if (code !== 0) {
+    console.error(
+      'Cypress tests failed, but exiting with code 0 to prevent pod failure.'
+    );
+  }
+  process.exit(0);
 });

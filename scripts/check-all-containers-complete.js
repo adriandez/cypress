@@ -1,5 +1,6 @@
 import { promises as fs } from 'fs';
 import path from 'path';
+import process from 'process';
 
 const checkCompletionStatus = async (sharedDir) => {
   try {
@@ -31,6 +32,14 @@ const coordinateCompletion = async () => {
   const containerName = process.env.TEST_BROWSER;
   const completionFile = `${containerName}.txt`;
 
+  const exitCode = process.env.TEST_EXIT_CODE || '0';
+
+  if (exitCode !== '0') {
+    console.log(
+      `Tests completed with exit code ${exitCode}. Creating completion file anyway.`
+    );
+  }
+
   await createCompletionFile(sharedDir, completionFile);
 
   while (true) {
@@ -46,5 +55,4 @@ const coordinateCompletion = async () => {
   }
 };
 
-// Run the coordination function
 coordinateCompletion();
