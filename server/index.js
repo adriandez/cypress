@@ -29,7 +29,7 @@ const getJenkinsCrumb = async () => {
   }
 };
 
-const triggerJenkinsPipeline = async (browser, branch, launchManual) => {
+const triggerJenkinsPipeline = async (browser, branch, launchManual, query) => {
   try {
     const crumb = await getJenkinsCrumb();
 

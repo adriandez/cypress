@@ -85,8 +85,6 @@ pipeline {
                 script {
                     def jobYaml = readFile(JOB_TEMPLATE_PATH)
                     jobYaml = jobYaml.replace("{{BROWSER}}", params.BROWSER)
-                    
-                    def jobYaml = readFile(JOB_TEMPLATE_PATH)
                     jobYaml = jobYaml.replace("{{QUERY}}", params.QUERY)
                     
                     def tempYamlPath = "build/k8s/cypress-job-${params.BROWSER}.yaml"
