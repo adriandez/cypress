@@ -44,7 +44,8 @@ const triggerJenkinsPipeline = async (browser, branch, launchManual) => {
       params: {
         BROWSER: browser,
         BRANCH: branch,
-        LAUNCH_MANUAL: launchManual
+        LAUNCH_MANUAL: launchManual,
+        QUERY: query
       }
     });
     return response.data;
