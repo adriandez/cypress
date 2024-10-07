@@ -56,15 +56,15 @@ const triggerJenkinsPipeline = async (browser, branch, launchManual) => {
 };
 
 app.post('/trigger-pipeline', (req, res) => {
-  const { browser, branch, launchManual } = req.body;
+  const { browser, branch, launchManual, query } = req.body;
 
-  if (!browser || !branch || launchManual === undefined) {
+  if (!browser || !branch || !launchManual || query === undefined) {
     return res
       .status(400)
       .send('Missing required parameters: browser, branch, or launchManual');
   }
 
-  triggerJenkinsPipeline(browser, branch, launchManual)
+  triggerJenkinsPipeline(browser, branch, launchManual, query)
     .then((jenkinsResponse) => {
       res.status(200).send({
         message: 'Pipeline triggered successfully',
