@@ -27,6 +27,11 @@ pipeline {
             defaultValue: false,
             description: 'Launch k8s job manually'
         )
+        string(
+            name: 'QUERY',
+            defaultValue: 'issue in (1245,1412,5858)',
+            description: 'Jira JQL for test-set'
+        )
     }
 
     stages {
@@ -80,6 +85,9 @@ pipeline {
                 script {
                     def jobYaml = readFile(JOB_TEMPLATE_PATH)
                     jobYaml = jobYaml.replace("{{BROWSER}}", params.BROWSER)
+                    
+                    def jobYaml = readFile(JOB_TEMPLATE_PATH)
+                    jobYaml = jobYaml.replace("{{QUERY}}", params.QUERY)
                     
                     def tempYamlPath = "build/k8s/cypress-job-${params.BROWSER}.yaml"
                     writeFile file: tempYamlPath, text: jobYaml

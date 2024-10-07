@@ -2,6 +2,7 @@
 set -e
 
 # Echo environment variables for logging purposes (optional)
+echo -e "[JQL_QUERY]: $JQL_QUERY\n"
 echo -e "[TEST_ENV]: $TEST_ENV\n"
 echo -e "[VIEWPORT_WIDTH]: $VIEWPORT_WIDTH\n"
 echo -e "[VIEWPORT_HEIGHT]: $VIEWPORT_HEIGHT\n"

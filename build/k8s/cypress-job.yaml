@@ -20,6 +20,8 @@ spec:
             value: {{BROWSER}}
           - name: TEST_ENV
             value: testing
+          - name: JQL_QUERY
+            value: {{QUERY}}
         envFrom:
           - configMapRef:
               name: cypress-env
