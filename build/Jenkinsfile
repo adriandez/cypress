@@ -1,6 +1,6 @@
 pipeline {
     agent any
-    
+
     environment {
         DOCKER_IMAGE_BASE = 'adriandez/cypress-automation'
         CONFIGMAP_PATH = 'build/k8s/cypress-configmap.yaml'
@@ -37,18 +37,24 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: "${params.BRANCH}"]],
-                    userRemoteConfigs: [[
-                        credentialsId: 'win-adri-id',
-                        url: 'https://github.com/adriandez/cypress-automation.git'
-                    ]]
-                ])
+                script {
+                    try {
+                        checkout([
+                            $class: 'GitSCM',
+                            branches: [[name: "${params.BRANCH}"]],
+                            userRemoteConfigs: [[
+                                credentialsId: 'win-adri-id',
+                                url: 'https://github.com/adriandez/cypress-automation.git'
+                            ]]
+                        ])
+                    } catch (e) {
+                        error "Failed to checkout code: ${e.getMessage()}"
+                    }
+                }
             }
         }
-        
-        stage("Build and Push Docker Images") {
+
+        stage('Build and Push Docker Images') {
             steps {
                 script {
                     try {
@@ -56,12 +62,14 @@ pipeline {
                             ['chrome', 'edge', 'firefox'].each { browser ->
                                 def browserImage = docker.build("${DOCKER_IMAGE_BASE}:${browser}", 
                                     "--build-arg INSTALL_BROWSER=${browser} -f build/Dockerfile .")
+                                echo "Built Docker image for ${browser}."
                                 bat "docker inspect ${DOCKER_IMAGE_BASE}:${browser} | findstr INSTALL_BROWSER"
                                 browserImage.push()
+                                echo "Pushed Docker image: ${DOCKER_IMAGE_BASE}:${browser}."
                             }
                         }
                     } catch (e) {
-                        error "Failed to build and push Docker images: ${e}"
+                        error "Failed to build and push Docker images: ${e.getMessage()}"
                     }
                 }
             }
@@ -70,9 +78,14 @@ pipeline {
         stage('Clean Up Docker Images') {
             steps {
                 script {
-                    bat '''
-                        for /f "tokens=3" %%i in ('docker images ^| findstr "cypress-automation"') do docker rmi %%i --force
-                    '''
+                    try {
+                        bat '''
+                            for /f "tokens=3" %%i in ('docker images ^| findstr "cypress-automation"') do docker rmi %%i --force
+                        '''
+                        echo 'Docker images cleaned up successfully.'
+                    } catch (e) {
+                        echo "Warning: Failed to clean up Docker images: ${e.getMessage()}"
+                    }
                 }
             }
         }
@@ -83,16 +96,22 @@ pipeline {
             }
             steps {
                 script {
-                    def jobYaml = readFile(JOB_TEMPLATE_PATH)
-                    jobYaml = jobYaml.replace("{{BROWSER}}", params.BROWSER)
-                    jobYaml = jobYaml.replace("{{QUERY}}", params.QUERY)
-                    
-                    def tempYamlPath = "build/k8s/cypress-job-${params.BROWSER}.yaml"
-                    writeFile file: tempYamlPath, text: jobYaml
+                    try {
+                        def jobYaml = readFile(JOB_TEMPLATE_PATH)
+                        jobYaml = jobYaml.replace("{{BROWSER}}", params.BROWSER)
+                        jobYaml = jobYaml.replace("{{QUERY}}", params.QUERY)
+                        
+                        def tempYamlPath = "build/k8s/cypress-job-${params.BROWSER}.yaml"
+                        writeFile file: tempYamlPath, text: jobYaml
 
-                    withCredentials([file(credentialsId: KUBERNETES_CREDENTIALS, variable: 'KUBECONFIG')]) {
-                        bat "kubectl apply -f ${CONFIGMAP_PATH} --kubeconfig=%KUBECONFIG%"
-                        bat "kubectl apply -f ${tempYamlPath} --kubeconfig=%KUBECONFIG%"
+                        withCredentials([file(credentialsId: KUBERNETES_CREDENTIALS, variable: 'KUBECONFIG')]) {
+                            bat "kubectl delete job cypress-automation-${params.BROWSER} --kubeconfig=%KUBECONFIG% || echo 'No existing job to delete'"
+                            bat "kubectl apply -f ${CONFIGMAP_PATH} --kubeconfig=%KUBECONFIG%"
+                            bat "kubectl apply -f ${tempYamlPath} --kubeconfig=%KUBECONFIG%"
+                            echo 'Kubernetes job deployed successfully.'
+                        }
+                    } catch (e) {
+                        error "Failed to deploy Kubernetes job: ${e.getMessage()}"
                     }
                 }
             }
@@ -101,21 +120,26 @@ pipeline {
         stage('Deploy to Kubernetes Cron Job') {
             steps {
                 script {
-                    withCredentials([file(credentialsId: KUBERNETES_CREDENTIALS, variable: 'KUBECONFIG')]) {
-                        bat "kubectl apply -f ${CONFIGMAP_PATH_CRON} --kubeconfig=%KUBECONFIG%"
-                        bat "kubectl apply -f ${CRON_JOB_PATH} --kubeconfig=%KUBECONFIG%"
+                    try {
+                        withCredentials([file(credentialsId: KUBERNETES_CREDENTIALS, variable: 'KUBECONFIG')]) {
+                            bat "kubectl apply -f ${CONFIGMAP_PATH_CRON} --kubeconfig=%KUBECONFIG%"
+                            bat "kubectl apply -f ${CRON_JOB_PATH} --kubeconfig=%KUBECONFIG%"
+                            echo 'Kubernetes cron job deployed successfully.'
+                        }
+                    } catch (e) {
+                        error "Failed to deploy Kubernetes cron job: ${e.getMessage()}"
                     }
                 }
             }
         }
-    } 
+    }
 
     post {
         success {
-            echo 'Pipeline completed successfully'
+            echo 'Pipeline completed successfully.'
         }
         failure {
-            echo 'Pipeline failed'
+            echo 'Pipeline failed. Check the logs for more details.'
         }
     }
 }
